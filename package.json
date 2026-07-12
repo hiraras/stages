@@ -1,0 +1,55 @@
+{
+  "name": "stages",
+  "version": "0.1.0",
+  "description": "Cross-session code staging layer for AI-assisted development",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "stages": "./bin/stages.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "bin"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "build:prod": "cross-env BUILD_PROD=true tsup",
+    "build:extension": "npm run build && cd extension && npm install && npm run build",
+    "package:extension": "npm run build:extension && cd extension && npm run package",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run build:prod && npm test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "stages",
+    "staging",
+    "ai",
+    "diff",
+    "cli"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.1.0",
+    "fast-glob": "^3.3.2",
+    "ignore": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "cross-env": "^10.1.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

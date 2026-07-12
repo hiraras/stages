@@ -1,0 +1,47 @@
+import type { StagesAPI } from "../types/index.js";
+import { snap } from "./stage/create.js";
+import { init } from "./stage/init.js";
+import { merge } from "./stage/merge.js";
+import { commit } from "./stage/commit.js";
+import { verify } from "./stage/verify.js";
+import { log } from "./stage/log.js";
+import {
+  hide,
+  unhide,
+  list,
+  rename,
+  status,
+  readFile,
+  readCommitFile,
+  getPrevStageId,
+  getPrevCommitId,
+  readBaselineFile,
+} from "./stage/lifecycle.js";
+import { show } from "./stage/show.js";
+import { listUnstaged } from "./stage/unstaged.js";
+
+export function createStagesAPI(): StagesAPI {
+  return {
+    init,
+    snap,
+    list,
+    show,
+    merge,
+    rename,
+    commit,
+    verify,
+    log,
+    hide,
+    unhide,
+    status,
+    listUnstaged,
+    readFile,
+    readCommitFile,
+    getPrevStageId,
+    getPrevCommitId,
+    readBaselineFile,
+  };
+}
+
+export * from "../types/index.js";
+export { StagesError, ERROR_MESSAGES } from "./errors.js";

@@ -1,0 +1,107 @@
+{
+  "name": "stages-vscode",
+  "displayName": "Stages",
+  "description": "View and review cross-session code stages in the Source Control panel. Works with the Stages CLI for AI-assisted batch staging before git commit.",
+  "version": "0.1.0",
+  "publisher": "stages",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "SCM Providers"
+  ],
+  "keywords": [
+    "stages",
+    "staging",
+    "scm",
+    "diff",
+    "ai",
+    "code review",
+    "git"
+  ],
+  "activationEvents": [
+    "workspaceContains:.stages/meta.json"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "stages.refresh",
+        "title": "Stages: Refresh",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "stages.rename",
+        "title": "Stages: Rename Stage"
+      },
+      {
+        "command": "stages.openDiff",
+        "title": "Stages: Open Diff"
+      },
+      {
+        "command": "stages.showFiles",
+        "title": "Stages: Show Files",
+        "icon": "$(files)"
+      },
+      {
+        "command": "stages.hideFiles",
+        "title": "Stages: Hide Files",
+        "icon": "$(chevron-up)"
+      }
+    ],
+    "configuration": {
+      "title": "Stages",
+      "properties": {
+        "stages.showHidden": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show hidden committed stages in the Stages SCM panel"
+        }
+      }
+    },
+    "menus": {
+      "scm/title": [
+        {
+          "command": "stages.refresh",
+          "when": "scmProvider == stages",
+          "group": "navigation"
+        }
+      ],
+      "scm/resourceGroup/context": [
+        {
+          "command": "stages.showFiles",
+          "when": "scmProvider == stages && scmResourceGroupState == files-hidden",
+          "group": "inline"
+        },
+        {
+          "command": "stages.hideFiles",
+          "when": "scmProvider == stages && scmResourceGroupState == files-visible && scmResourceGroup != __unstaged__",
+          "group": "inline"
+        },
+        {
+          "command": "stages.rename",
+          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/",
+          "group": "inline"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "npm run build && vsce package --no-dependencies --allow-missing-repository",
+    "vscode:prepublish": "npm run build"
+  },
+  "dependencies": {
+    "stages": "file:.."
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.1",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.7.2"
+  }
+}
