@@ -12,6 +12,7 @@ import { runMerge } from "./commands/merge.js";
 import { runCommit } from "./commands/commit.js";
 import { runVerify } from "./commands/verify.js";
 import { runLog } from "./commands/log.js";
+import { runDrop } from "./commands/drop.js";
 import {
   runHide,
   runRename,
@@ -34,6 +35,7 @@ const SUBCOMMANDS = [
   "verify",
   "hide",
   "unhide",
+  "drop",
   "status",
 ];
 
@@ -158,6 +160,15 @@ program
   .description("Unhide a committed stage")
   .action(async (id: string) => {
     await runUnhide(id);
+  });
+
+program
+  .command("drop <id>")
+  .description("Drop stages from the given id onward and restore the worktree")
+  .option("-y, --yes", "Skip confirmation prompt")
+  .option("--force", "Force restore when working tree is dirty")
+  .action(async (id: string, options: { yes?: boolean; force?: boolean }) => {
+    await runDrop(id, options.yes ?? false, options.force ?? false);
   });
 
 program

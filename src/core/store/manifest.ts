@@ -51,6 +51,13 @@ export function compareManifests(
   return changes;
 }
 
+export function deleteManifest(projectRoot: string, stageId: string): void {
+  const manifestPath = getManifestPath(projectRoot, stageId);
+  if (fs.existsSync(manifestPath)) {
+    fs.unlinkSync(manifestPath);
+  }
+}
+
 export function copyManifest(
   projectRoot: string,
   sourceStageId: string,

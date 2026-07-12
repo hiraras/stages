@@ -91,6 +91,7 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
 | `stages commit -m "msg" [--force]`   | 提交当前 cycle 到工作区   |
 | `stages log`                         | 查看 commit 历史          |
 | `stages verify`                      | 构建前门禁                |
+| `stages drop <id> [--yes] [--force]` | 删除序号 ≥ N 的 stage，还原工作区 |
 | `stages hide/unhide <id>`            | 隐藏/显示 committed stage |
 
 **show ID 格式：** stage 用 `1` / `stage-001`；commit 用 `commit-001` / `c1`。

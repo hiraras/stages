@@ -30,4 +30,6 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   COMMIT_MESSAGE_REQUIRED: "Commit requires -m option.",
   COMMIT_NO_STAGES: "No stages to commit in the current cycle.",
   COMMIT_NOT_FOUND: "Commit not found.",
+  DROP_INVALID_STATUS: "Cannot drop this stage.",
+  DROP_CANCELLED: "Drop cancelled.",
 };

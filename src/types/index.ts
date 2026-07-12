@@ -120,11 +120,39 @@ export type ErrorCode =
   | "SNAP_NO_CHANGES"
   | "COMMIT_MESSAGE_REQUIRED"
   | "COMMIT_NO_STAGES"
-  | "COMMIT_NOT_FOUND";
+  | "COMMIT_NOT_FOUND"
+  | "DROP_INVALID_STATUS"
+  | "DROP_CANCELLED";
 
 export interface UnstagedResult {
   files: FileChangeEntry[];
   referenceStageId: string | null;
+}
+
+export interface DropRestoreTarget {
+  kind: "stage";
+  stageId: string;
+  stageName: string;
+}
+
+export interface DropBaselineTarget {
+  kind: "baseline";
+}
+
+export type DropTarget = DropRestoreTarget | DropBaselineTarget;
+
+export interface DropPlan {
+  targetId: string;
+  droppedStages: StageEntry[];
+  restoreTarget: DropTarget;
+  restoreManifest: Manifest;
+  affectedFiles: FileChangeEntry[];
+}
+
+export interface DropResult {
+  droppedIds: string[];
+  restoreTarget: DropTarget;
+  affectedFiles: FileChangeEntry[];
 }
 
 export interface StagesAPI {
@@ -157,6 +185,12 @@ export interface StagesAPI {
     projectRoot: string,
     opts: { message: string; force?: boolean },
   ): Promise<CommitEntry>;
+  planDrop(projectRoot: string, stageId: string): DropPlan;
+  drop(
+    projectRoot: string,
+    stageId: string,
+    opts?: { force?: boolean },
+  ): Promise<DropResult>;
   verify(projectRoot: string): Promise<VerifyResult>;
   log(projectRoot: string): Promise<CommitEntry[]>;
   hide(projectRoot: string, stageId: string): Promise<void>;

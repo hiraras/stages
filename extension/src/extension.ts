@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { registerStagesContentProvider } from "./fs/stagesFs.js";
 import { openStageDiff, StagesSCMProvider } from "./scm/stagesProvider.js";
 import { pickStageForRename } from "./commands/rename.js";
+import { dropStage } from "./commands/drop.js";
 import { findStagesRoot } from "./utils/workspace.js";
 
 let scmProvider: StagesSCMProvider | null = null;
@@ -157,8 +158,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "stages.openDiff",
+    vscode.commands.registerCommand("stages.drop", async (group?: { id: string }) => {
+      if (!scmProvider || !group?.id?.startsWith("stage-")) {
+        return;
+      }
+      await dropStage(projectRoot, group.id, () => refresh("full"));
+    }),
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("stages.openDiff",
       (
         stageId: string,
         stageName: string,

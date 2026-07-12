@@ -17,6 +17,7 @@ import {
   getPrevCommitId,
   readBaselineFile,
 } from "./stage/lifecycle.js";
+import { drop, planDrop } from "./stage/drop.js";
 import { show } from "./stage/show.js";
 import { listUnstaged } from "./stage/unstaged.js";
 
@@ -29,6 +30,8 @@ export function createStagesAPI(): StagesAPI {
     merge,
     rename,
     commit,
+    planDrop,
+    drop,
     verify,
     log,
     hide,

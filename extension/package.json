@@ -46,6 +46,10 @@
         "title": "Stages: Rename Stage"
       },
       {
+        "command": "stages.drop",
+        "title": "Stages: Drop Stage…"
+      },
+      {
         "command": "stages.openDiff",
         "title": "Stages: Open Diff"
       },
@@ -93,6 +97,11 @@
           "command": "stages.rename",
           "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/",
           "group": "inline"
+        },
+        {
+          "command": "stages.drop",
+          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/",
+          "group": "1"
         }
       ]
     }

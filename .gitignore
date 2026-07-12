@@ -6,5 +6,3 @@ extension/node_modules/
 .DS_Store
 coverage/
 .stages/
-
-docs/

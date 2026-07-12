@@ -206,6 +206,17 @@ export function archiveCurrentCycle(
   writeMeta(projectRoot, meta);
 }
 
+export function removeStages(projectRoot: string, ids: string[]): void {
+  if (ids.length === 0) {
+    return;
+  }
+
+  const meta = readMeta(projectRoot);
+  const idSet = new Set(ids);
+  meta.stages = meta.stages.filter((stage) => !idSet.has(stage.id));
+  writeMeta(projectRoot, meta);
+}
+
 export function createInitialMeta(baseline: string): StagesMeta {
   return {
     version: 1,
