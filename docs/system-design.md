@@ -771,6 +771,8 @@ cd extension && esbuild src/extension.ts --bundle --outdir=dist --external:vscod
 
 ### 14.2 发布
 
+仓库：https://github.com/hiraras/stages
+
 | 产物 | 目标 | 命令 |
 |------|------|------|
 | `stages` CLI | npm | `npm publish` |

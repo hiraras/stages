@@ -87,9 +87,10 @@ AI 改代码 → stages -m "描述" → 在扩展中审查 diff
 
 ## 相关链接
 
+- 项目仓库：[github.com/hiraras/stages](https://github.com/hiraras/stages)
 - CLI 包：[stages on npm](https://www.npmjs.com/package/stages)
-- 源码与文档：见项目仓库 README
+- 扩展源码：[extension/](https://github.com/hiraras/stages/tree/main/extension)
 
 ## License
 
-MIT
+MIT — 见 [LICENSE.md](https://github.com/hiraras/stages/blob/main/extension/LICENSE.md)

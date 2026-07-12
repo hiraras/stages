@@ -2,7 +2,8 @@
 
 > 预估：2 天  
 > 前置依赖：P3 + P4 + P5  
-> 产出：可发布的 npm 包 + VS Code 扩展
+> 产出：可发布的 npm 包 + VS Code 扩展  
+> 仓库：https://github.com/hiraras/stages
 
 ---
 
@@ -126,6 +127,8 @@ vsce package         # 生成 .vsix
 
 **描述：** 发布 CLI 包到 npm registry。
 
+**仓库：** https://github.com/hiraras/stages
+
 **步骤：**
 ```bash
 npm run build
@@ -140,12 +143,18 @@ npm publish --access public
 
 ---
 
-## P6-08 发布到 Open VSX
+## P6-08 发布到 VS Marketplace / Open VSX
 
-**描述：** 发布扩展到 Open VSX Registry（Cursor 可用）。
+**描述：** 发布扩展到 VS Code Marketplace 与 Open VSX Registry（Cursor 可用）。
+
+**仓库：** https://github.com/hiraras/stages/tree/main/extension
 
 **步骤：**
 ```bash
+cd extension
+npm run package
+npx vsce login <publisher>
+npx vsce publish
 ovsx publish stages-vscode-x.x.x.vsix
 ```
 

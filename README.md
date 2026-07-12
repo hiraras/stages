@@ -2,6 +2,8 @@
 
 跨会话的代码改动确认与组批工具——独立于 `git add` 的暂存层，让你在多次 AI 对话后分批保存、审查、合并，最终一次性提交。
 
+仓库：[github.com/hiraras/stages](https://github.com/hiraras/stages)
+
 ## 安装
 
 ```bash
@@ -68,9 +70,9 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
 - 新增 stage / Unstaged 分组始终排在最上方（Unstaged 第一，其次最新 stage）
 - 无 Unstaged 且全部收起时，底部显示一行提示（保持面板可见）
 - 点击文件打开 diff 视图
-  - unstaged：左 = 最新 stage / baseline，右 = 工作区文件
-  - stage：左 = 上一 stage / git HEAD，右 = 当前 stage
-  - commit：语义同 `stages show commit-001`
+    - unstaged：左 = 最新 stage / baseline，右 = 工作区文件
+    - stage：左 = 上一 stage / git HEAD，右 = 当前 stage
+    - commit：语义同 `stages show commit-001`
 - 编辑工作区文件后 Unstaged 区域自动更新；`stages -m` / `stages commit` 后全量刷新
 - 右键 stage 可 Rename（仅 pending / ready）；commit 只读
 - 设置 `stages.showHidden: true` 显示已隐藏的 archived stage
@@ -79,17 +81,17 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
 
 ## 命令参考
 
-| 命令 | 说明 |
-|------|------|
-| `stages` / `stages -m "msg"` | 保存当前改动为 stage |
-| `stages list [--all]` | 列出 stage |
+| 命令                                 | 说明                      |
+| ------------------------------------ | ------------------------- |
+| `stages` / `stages -m "msg"`         | 保存当前改动为 stage      |
+| `stages list [--all]`                | 列出 stage                |
 | `stages show <id> [--stat] [--open]` | 查看 stage 或 commit diff |
-| `stages merge <ids> --name <n>` | 合并连续 stage |
-| `stages rename <id> <name>` | 重命名 stage |
-| `stages commit -m "msg" [--force]` | 提交当前 cycle 到工作区 |
-| `stages log` | 查看 commit 历史 |
-| `stages verify` | 构建前门禁 |
-| `stages hide/unhide <id>` | 隐藏/显示 committed stage |
+| `stages merge <ids> --name <n>`      | 合并连续 stage            |
+| `stages rename <id> <name>`          | 重命名 stage              |
+| `stages commit -m "msg" [--force]`   | 提交当前 cycle 到工作区   |
+| `stages log`                         | 查看 commit 历史          |
+| `stages verify`                      | 构建前门禁                |
+| `stages hide/unhide <id>`            | 隐藏/显示 committed stage |
 
 **show ID 格式：** stage 用 `1` / `stage-001`；commit 用 `commit-001` / `c1`。
 
@@ -119,12 +121,6 @@ npm pack                  # 检查 CLI 包内容
 npm publish --access public
 
 cd extension && npm run package
-# ovsx publish stages-vscode-0.1.0.vsix
+npx vsce publish   # 需先 vsce login <publisher>
+# 扩展源码：https://github.com/hiraras/stages/tree/main/extension
 ```
-
-## 文档
-
-- [需求文档](./docs/requirements.md)
-- [系统设计](./docs/system-design.md)
-- [任务清单](./docs/tasks/00-overview.md)
-- [开发进度](./docs/process.md)
