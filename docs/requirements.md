@@ -293,23 +293,7 @@ npx stages verify
 | 工作区有未 stage 改动 | 报错退出码 1 |
 | 全部已 commit 且工作区干净 | 通过 |
 
-#### 5.1.9 `stages hide <id>` / `stages unhide <id>`
-
-隐藏或恢复已提交的 stage（不删除数据，仅从列表中隐藏）。
-
-```bash
-npx stages hide stage-001             # 从 list / 扩展面板中隐藏
-npx stages unhide stage-001           # 恢复显示
-npx stages list --all                 # 包含已隐藏的 stage
-```
-
-**规则：**
-
-- 仅 `committed` 状态的 stage 可隐藏
-- 隐藏只影响展示，快照数据仍保留在 `.stages/`
-- 扩展面板默认不显示已隐藏 stage，可通过设置或 `--all` 查看
-
-#### 5.1.10 `stages drop <id>`
+#### 5.1.9 `stages drop <id>`
 
 删除当前 cycle 中序号 **≥ N** 的所有 stage，并将工作区恢复到删除前的有效快照。
 
@@ -342,7 +326,7 @@ npx stages drop 3 --force      # 强制覆盖工作区未 stage 改动
 - 工作区有未 stage 改动 → 列出文件，提示 `--force`
 - 用户取消确认 → 不修改数据
 
-#### 5.1.11 `stages init`
+#### 5.1.10 `stages init`
 
 初始化当前项目的 stages 存储。
 
@@ -361,7 +345,7 @@ npx stages init
 
 > 首次执行 `stages` 时若未初始化，会自动执行等效于 `stages init` 的操作。
 
-#### 5.1.12 `stages status`
+#### 5.1.11 `stages status`
 
 显示当前项目 stages 概况。
 
@@ -454,7 +438,7 @@ Source Control: Stages
 | E1 | commit 与 stage 排列 | 当前 cycle stage 在上，commit 历史在下 |
 | E2 | commit 排序 | 新 → 旧（与 `stages log` 一致） |
 | E3 | commit 标题是否显示 stageIds | 否，仅 `{序号} {name} [commit]` |
-| E4 | commit 与 `showHidden` 关系 | commit 承担历史审查；`showHidden` 仍仅控制已归档 stage |
+| E4 | commit 历史展示 | 扩展面板与 `stages log` 承担历史审查；已 commit 的 stage 元数据默认不在当前 cycle 列表中显示 |
 | E5 | 视觉分隔 | 不需要，`[commit]` 标签即可区分 |
 
 ### 5.3 存储
@@ -593,7 +577,7 @@ stage-001 的 commit diff: diff(git HEAD, snapshot-001)
 
 ### 9.1 包含
 
-- [x] CLI：`stages`、`init`、`list`、`show`、`merge`、`rename`、`commit`、`hide`、`status`
+- [x] CLI：`stages`、`init`、`list`、`show`、`merge`、`rename`、`commit`、`drop`、`status`
 - [x] 独立 `.stages/` 存储
 - [x] 增量 diff 计算
 - [x] 连续 stage 合并 + 重命名
@@ -642,7 +626,7 @@ stages/
 | # | 问题 | 确认结果 |
 |---|------|----------|
 | T1 | 合并时快照策略 | 物理生成新快照（累计状态） |
-| T2 | `stages commit` 后原 stage 如何处理 | 标记 `committed`，保留历史；用户可通过 `stages hide` 隐藏 |
+| T2 | `stages commit` 后原 stage 如何处理 | 标记 `committed`，保留历史；扩展通过 commit 列表审查，`stages list --all` 可查看元数据 |
 | T3 | 工作区有脏改动时执行 `stages commit` | 警告并需 `--force` 确认；`--force` 用最新 stage 快照覆盖未 stage 改动 |
 | T4 | stage ID 格式 | 自动递增：`stage-001`、`stage-002` |
 | T5 | 是否支持 `stages init` 初始化 | 支持；首次 `stages` 也可自动初始化 |
@@ -668,7 +652,7 @@ stages/
 - [ ] 工作区有未 stage 改动时 `stages commit` 警告，需 `--force` 才继续；`--force` 覆盖未 stage 改动
 - [ ] `stages -m` 与 `stages commit -m` 均可正常使用（无 Commander 选项冲突）
 - [ ] 工作区无新改动时 `stages -m` 提示 `No new changes.`
-- [ ] `stages hide` 可隐藏已提交 stage，`list --all` 可查看
+- [ ] `stages list --all` 可查看含已 commit 的 stage 元数据
 - [ ] `stages init` 可初始化，首次 `stages` 自动初始化
 - [ ] 应用后用户可正常 `git add` + `git commit`
 

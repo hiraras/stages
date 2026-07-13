@@ -99,31 +99,6 @@ function resolveCurrentCycleStageEntry(
   return stage;
 }
 
-export function getCommittedStageEntry(
-  meta: StagesMeta,
-  id: string,
-): StageEntry | undefined {
-  for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
-    const stage = meta.stages[index]!;
-    if (stage.id === id && stage.commitId) {
-      return stage;
-    }
-  }
-  return undefined;
-}
-
-export function resolveCommittedStageEntry(
-  meta: StagesMeta,
-  input: string,
-): StageEntry {
-  const stageId = normalizeStageInput(input);
-  const stage = getCommittedStageEntry(meta, stageId);
-  if (!stage) {
-    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${stageId}`);
-  }
-  return stage;
-}
-
 export function resolveStageEntry(meta: StagesMeta, input: string): StageEntry {
   const stageId = normalizeStageInput(input);
   return resolveCurrentCycleStageEntry(meta, stageId);

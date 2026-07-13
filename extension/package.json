@@ -64,16 +64,6 @@
         "icon": "$(chevron-up)"
       }
     ],
-    "configuration": {
-      "title": "Stages",
-      "properties": {
-        "stages.showHidden": {
-          "type": "boolean",
-          "default": false,
-          "description": "Show hidden committed stages in the Stages SCM panel"
-        }
-      }
-    },
     "menus": {
       "scm/title": [
         {

@@ -3,9 +3,9 @@ import { StagesError } from "../errors.js";
 import { getManifestFileContent } from "../diff/engine.js";
 import { getFileAtCommit } from "../git/head.js";
 import { getPrevStageIdForEntry } from "../diff/resolver.js";
-import { resolveCommitId, resolveCommittedStageEntry, resolveStageId } from "../store/id.js";
+import { resolveCommitId, resolveStageId } from "../store/id.js";
 import { readManifest } from "../store/manifest.js";
-import { findStages, getCommit, getStage, readMeta, updateStage, updateStageEntry } from "../store/meta.js";
+import { findStages, getCommit, getStage, readMeta, updateStage } from "../store/meta.js";
 
 export async function rename(
   projectRoot: string,
@@ -28,37 +28,6 @@ export async function rename(
   }
 
   updateStage(projectRoot, resolvedId, { name: newName.trim() });
-}
-
-export async function hide(projectRoot: string, stageId: string): Promise<void> {
-  const meta = readMeta(projectRoot);
-  const stage = resolveCommittedStageEntry(meta, stageId);
-
-  if (stage.status !== "committed") {
-    throw new StagesError(
-      "INVALID_HIDE",
-      `Only committed stages can be hidden. Stage ${stage.id} is ${stage.status}.`,
-    );
-  }
-
-  updateStageEntry(projectRoot, stage, { hidden: true });
-}
-
-export async function unhide(
-  projectRoot: string,
-  stageId: string,
-): Promise<void> {
-  const meta = readMeta(projectRoot);
-  const stage = resolveCommittedStageEntry(meta, stageId);
-
-  if (stage.status !== "committed") {
-    throw new StagesError(
-      "INVALID_HIDE",
-      `Only committed stages can be unhidden. Stage ${stage.id} is ${stage.status}.`,
-    );
-  }
-
-  updateStageEntry(projectRoot, stage, { hidden: false });
 }
 
 export async function list(

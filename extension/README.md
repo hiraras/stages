@@ -66,12 +66,6 @@ AI 改代码 → stages -m "描述" → 在扩展中审查 diff
 | `Stages: Hide Files` | 收起分组文件列表 |
 | `Stages: Rename Stage` | 重命名 stage |
 
-## 设置
-
-| 设置 | 默认值 | 说明 |
-|------|--------|------|
-| `stages.showHidden` | `false` | 显示已隐藏的 committed stage |
-
 ## 常见问题
 
 **看不到 Stages 面板？**

@@ -8,7 +8,7 @@
 
 ## 1. 背景与动机
 
-当前 Stages 支持创建（snap）、合并（merge）、提交（commit）、隐藏（hide）stage，但**无法撤销已保存的 stage**。开发者在审查后发现某个 stage 不应保留，或想从中间某个 stage 起丢弃后续改动时，缺少对应操作。
+当前 Stages 支持创建（snap）、合并（merge）、提交（commit）stage，但**无法撤销已保存的 stage**。开发者在审查后发现某个 stage 不应保留，或想从中间某个 stage 起丢弃后续改动时，缺少对应操作。
 
 `stages drop` 用于**删除当前 cycle 中序号 ≥ N 的所有 stage**，并将工作区文件恢复到删除前的有效快照状态。
 
@@ -176,7 +176,6 @@ $ stages drop 4
 
 | 命令 | 对比 |
 |------|------|
-| `hide` | 仅隐藏展示，不删数据，不改工作区 |
 | `drop` | **物理删除** stage 元数据与 manifest，**并还原工作区** |
 | `commit --force` | 用最新 stage 覆盖工作区；drop 是用更早 stage / baseline 覆盖 |
 

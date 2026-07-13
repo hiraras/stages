@@ -28,8 +28,8 @@ async function openDiff(stageId: string): Promise<void> {
   const meta = readMeta(root);
   const resolvedId = resolveStageId(meta, stageId);
   const stage = getStage(root, resolvedId);
-  const useBaseline = Boolean(stage.mergedFrom && stage.mergedFrom.length > 0);
-  const prevId = useBaseline ? null : await api.getPrevStageId(root, stageId);
+  const prevId = await api.getPrevStageId(root, stageId);
+  const useBaseline = prevId === null;
 
   try {
     const editor = detectEditor();

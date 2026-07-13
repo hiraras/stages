@@ -29,27 +29,6 @@ describe("acceptance: CLI requirements §12.1", () => {
     expect(list[0]?.name).toBe("after rename");
   });
 
-  it("hide committed stage and list --all shows it", async () => {
-    const root = createSimpleProject();
-    initTestRepo(root);
-    commitAll(root, "init");
-    await api.init(root);
-
-    fs.writeFileSync(
-      path.join(root, "src/math.ts"),
-      "export function add(a: number, b: number) { return a + b + 9; }\n",
-    );
-    await api.snap(root, { message: "to commit" });
-    await api.commit(root, { message: "cycle one", force: true });
-    await api.hide(root, "stage-001");
-
-    const active = await api.list(root);
-    expect(active).toHaveLength(0);
-
-    const all = await api.list(root, { all: true });
-    expect(all.some((stage) => stage.id === "stage-001" && stage.hidden)).toBe(true);
-  });
-
   it("rejects merge on committed stage", async () => {
     const root = createSimpleProject();
     initTestRepo(root);

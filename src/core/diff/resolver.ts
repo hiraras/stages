@@ -71,8 +71,12 @@ function getOldManifestForStage(
   stage: StageEntry,
 ): Manifest | null {
   if (stage.mergedFrom && stage.mergedFrom.length > 0) {
-    const lastMergedId = stage.mergedFrom[stage.mergedFrom.length - 1];
-    return readManifest(projectRoot, lastMergedId);
+    const firstMergedId = stage.mergedFrom[0]!;
+    const firstMerged = getStage(projectRoot, firstMergedId);
+    if (firstMerged.prev) {
+      return readManifest(projectRoot, firstMerged.prev);
+    }
+    return null;
   }
 
   if (stage.prev) {
@@ -325,8 +329,5 @@ function buffersEqual(
 }
 
 export function getPrevStageIdForEntry(stage: StageEntry): string | null {
-  if (stage.mergedFrom && stage.mergedFrom.length > 0) {
-    return stage.mergedFrom[stage.mergedFrom.length - 1];
-  }
   return stage.prev;
 }

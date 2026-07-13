@@ -113,7 +113,6 @@ export type ErrorCode =
   | "GIT_NOT_FOUND"
   | "BLOB_CORRUPT"
   | "INVALID_RENAME"
-  | "INVALID_HIDE"
   | "INVALID_COMMIT"
   | "ALREADY_INITIALIZED"
   | "PATH_TRAVERSAL"
@@ -194,8 +193,6 @@ export interface StagesAPI {
   ): Promise<DropResult>;
   verify(projectRoot: string): Promise<VerifyResult>;
   log(projectRoot: string): Promise<CommitEntry[]>;
-  hide(projectRoot: string, stageId: string): Promise<void>;
-  unhide(projectRoot: string, stageId: string): Promise<void>;
   status(projectRoot: string): Promise<StatusSummary>;
   listUnstaged(projectRoot: string): Promise<UnstagedResult>;
   readFile(

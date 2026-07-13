@@ -8,7 +8,6 @@ import {
   type UnstagedResult,
 } from "stages";
 import { buildBaselineUri, buildCommitUri, buildEmptyUri, buildStageUri } from "../fs/stagesFs.js";
-import { getShowHiddenSetting } from "../utils/workspace.js";
 
 const api = createStagesAPI();
 export const UNSTAGED_GROUP_ID = "__unstaged__";
@@ -140,25 +139,12 @@ export class StagesSCMProvider implements vscode.Disposable {
   }
 
   private async loadSnapshot(): Promise<RefreshSnapshot> {
-    const showHidden = getShowHiddenSetting();
     const [current, unstaged] = await Promise.all([
       api.list(this.projectRoot),
       api.listUnstaged(this.projectRoot),
     ]);
 
-    const visibleStages = sortNewestFirst(
-      showHidden
-        ? [
-            ...current,
-            ...(await api.list(this.projectRoot, { all: true })).filter(
-              (stage) =>
-                stage.status === "committed" &&
-                stage.hidden &&
-                !current.some((item) => item.id === stage.id),
-            ),
-          ]
-        : current,
-    );
+    const visibleStages = sortNewestFirst(current);
 
     const visibleCommits = [...(await api.log(this.projectRoot))].reverse();
     const commitPrevIds = new Map<string, string | null>();
@@ -497,7 +483,7 @@ export class StagesSCMProvider implements vscode.Disposable {
 
     const diff = api.show(this.projectRoot, stage.id);
     const prevId = stage.prev;
-    const useBaseline = prevId === null || Boolean(stage.mergedFrom?.length);
+    const useBaseline = prevId === null;
 
     group.resourceStates = diff.files.map((file) =>
       this.buildResourceState({

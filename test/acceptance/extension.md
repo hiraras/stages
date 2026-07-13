@@ -45,7 +45,6 @@
 
 - [ ] CLI 执行 `stages -m "..."` 后 1 秒内视图自动刷新
 - [ ] 视图标题栏 Refresh 按钮可用
-- [ ] `stages.showHidden: true` 后显示 hidden committed stage
 - [ ] 右键 stage 分组 → Rename Stage 可重命名 pending stage
 
 ## 兼容性

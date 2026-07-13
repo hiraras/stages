@@ -17,7 +17,3 @@ export function findStagesRoot(): string | null {
 
   return null;
 }
-
-export function getShowHiddenSetting(): boolean {
-  return vscode.workspace.getConfiguration("stages").get<boolean>("showHidden", false);
-}

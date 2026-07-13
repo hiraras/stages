@@ -4,7 +4,7 @@
 > 前置依赖：P2（基础命令）、P4（完整命令）  
 > 产出：完整的 `stages` CLI 工具
 
-> **注意：** P3 分两轮实现。P2 完成后实现基础命令（snap/init/list/show/status），P4 完成后补充 merge/commit/rename/hide 命令。
+> **注意：** P3 分两轮实现。P2 完成后实现基础命令（snap/init/list/show/status），P4 完成后补充 merge/commit/rename/drop 命令。
 
 ---
 
@@ -25,8 +25,7 @@ stages rename <id> <name>
 stages commit -m <msg> [--force]
 stages log
 stages verify
-stages hide <id>
-stages unhide <id>
+stages drop <id> [--yes] [--force]
 stages status
 ```
 

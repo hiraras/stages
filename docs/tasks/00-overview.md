@@ -100,7 +100,7 @@ P0 项目初始化
 | P4-04 | 实现脏工作区检测 | P0 |
 | P4-05 | 实现 commit 应用到工作区 | P0 |
 | P4-06 | 实现 `stages commit` CLI 命令（含 --force） | P0 |
-| P4-07 | 实现 rename / hide / unhide | P0 |
+| P4-07 | 实现 rename | P0 |
 | P4-08 | 实现对应 CLI 命令 | P0 |
 | P4-09 | 暴露 StagesAPI 公共接口 | P0 |
 | P4-10 | 生命周期集成测试 | P0 |
@@ -116,7 +116,7 @@ P0 项目初始化
 | P5-05 | 实现点击文件打开 vscode.diff | P0 |
 | P5-06 | 实现 meta.json 文件监听与自动刷新 | P0 |
 | P5-07 | 实现右键 Rename 命令 | P1 |
-| P5-08 | 隐藏 committed stage 过滤逻辑 | P1 |
+| P5-08 | ~~隐藏 committed stage 过滤逻辑~~（已移除：历史由 commit 列表承担） | — |
 | P5-09 | 扩展手动测试与 Cursor 兼容性验证 | P0 |
 
 ### P6 — 测试 / 文档 / 发布（8 项）
@@ -146,7 +146,7 @@ P0 项目初始化
 | stages rename | P4-07, P4-08, P6-01 |
 | stages commit 应用到工作区 | P4-05, P4-06, P6-01 |
 | 脏工作区需 --force | P4-04, P4-06, P6-01 |
-| stages hide / list --all | P4-07, P4-08, P6-01 |
+| stages list --all | P3-04, P6-01 |
 | stages init / 自动初始化 | P2-08, P3-03, P6-01 |
 | 扩展侧边栏 + diff | P5-03, P5-05, P5-09 |
 | CLI 新增后扩展自动刷新 | P5-06, P5-09 |

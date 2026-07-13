@@ -167,7 +167,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand("stages.openDiff",
+    vscode.commands.registerCommand(
+      "stages.openDiff",
       (
         stageId: string,
         stageName: string,
@@ -175,16 +176,16 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
         changeType: string,
         leftUri: string,
         rightUri: string,
-      ) => openStageDiff(stageId, stageName, filePath, changeType as "added" | "modified" | "deleted", leftUri, rightUri),
+      ) =>
+        openStageDiff(
+          stageId,
+          stageName,
+          filePath,
+          changeType as "added" | "modified" | "deleted",
+          leftUri,
+          rightUri,
+        ),
     ),
-  );
-
-  context.subscriptions.push(
-    vscode.workspace.onDidChangeConfiguration((event) => {
-      if (event.affectsConfiguration("stages.showHidden")) {
-        void refresh("full");
-      }
-    }),
   );
 }
 

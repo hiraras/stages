@@ -13,11 +13,7 @@ import { runCommit } from "./commands/commit.js";
 import { runVerify } from "./commands/verify.js";
 import { runLog } from "./commands/log.js";
 import { runDrop } from "./commands/drop.js";
-import {
-  runHide,
-  runRename,
-  runUnhide,
-} from "./commands/lifecycle.js";
+import { runRename } from "./commands/lifecycle.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const packagePath = path.resolve(__dirname, "../../package.json");
@@ -33,8 +29,6 @@ const SUBCOMMANDS = [
   "commit",
   "log",
   "verify",
-  "hide",
-  "unhide",
   "drop",
   "status",
 ];
@@ -146,20 +140,6 @@ program
   .description("Verify all stages are committed and working tree is clean")
   .action(async () => {
     await runVerify();
-  });
-
-program
-  .command("hide <id>")
-  .description("Hide a committed stage from list")
-  .action(async (id: string) => {
-    await runHide(id);
-  });
-
-program
-  .command("unhide <id>")
-  .description("Unhide a committed stage")
-  .action(async (id: string) => {
-    await runUnhide(id);
   });
 
 program

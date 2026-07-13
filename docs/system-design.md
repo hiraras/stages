@@ -63,7 +63,7 @@ stages/
 │   │   │   ├── merge.ts         # 合并 stage
 │   │   │   ├── commit.ts        # 应用到工作区
 │   │   │   ├── drop.ts          # 删除尾部 stage + 还原工作区
-│   │   │   └── lifecycle.ts     # rename / hide / status
+│   │   │   └── lifecycle.ts     # rename / list / status
 │   │   ├── git/                 # git 交互
 │   │   │   ├── head.ts          # 获取 HEAD
 │   │   │   └── worktree.ts      # 工作区状态检测
@@ -150,7 +150,7 @@ stages/
           ▼                          ▼
 ┌──────────────────────────────────────────────────────────┐
 │  业务层 (src/core/stage/)                                  │
-│  create │ merge │ commit │ drop │ rename │ hide │ list │ show    │
+│  create │ merge │ commit │ drop │ rename │ list │ show    │
 └──────────────────────────┬───────────────────────────────┘
                            │
           ┌────────────────┼────────────────┐
@@ -369,7 +369,7 @@ function computeStats(diffOutput: string): { additions: number; deletions: numbe
 | **Merge** | `core/stage/merge.ts` | 校验连续性 → 就地合并到第一个 stage → 隐藏被吸收 stage |
 | **Commit** | `core/stage/commit.ts` | 累计 diff → 应用到工作区 → 标记 committed |
 | **Drop** | `core/stage/drop.ts` | 删除尾部 stage → 还原工作区 → 更新 meta（见 [stage-drop.md](./features/stage-drop.md)） |
-| **Lifecycle** | `core/stage/lifecycle.ts` | rename、hide、unhide、list、status |
+| **Lifecycle** | `core/stage/lifecycle.ts` | rename、list、status |
 | **Show** | `core/stage/show.ts` | 解析 diff → 终端输出或调起编辑器 |
 
 ### 7.2 公共 API（供 CLI 和扩展调用）
@@ -389,8 +389,6 @@ export interface StagesAPI {
   drop(projectRoot: string, stageId: string, opts?: { force?: boolean }): Promise<DropResult>;
   verify(projectRoot: string): Promise<VerifyResult>;
   log(projectRoot: string): Promise<CommitEntry[]>;
-  hide(projectRoot: string, stageId: string): Promise<void>;
-  unhide(projectRoot: string, stageId: string): Promise<void>;
   status(projectRoot: string): Promise<StatusSummary>;
   getManifest(projectRoot: string, stageId: string): Promise<Manifest>;
   readFile(projectRoot: string, stageId: string, filePath: string): Promise<Buffer | null>;
@@ -483,8 +481,6 @@ stages commit -m <msg> [--force] # 提交当前 cycle
 stages drop <id> [--yes] [--force] # 删除序号 ≥ N 的 stage
 stages log                       # commit 历史
 stages verify                    # 构建前检查
-stages hide <id>                 # 隐藏
-stages unhide <id>               # 取消隐藏
 stages status                    # 概况
 ```
 
@@ -831,7 +827,7 @@ cd extension && esbuild src/extension.ts --bundle --outdir=dist --external:vscod
 | **P1** | 项目脚手架、core/store（blob + meta + manifest） | 2 天 |
 | **P2** | core/diff 引擎 + core/stage（create、list、show） | 2 天 |
 | **P3** | CLI 全部命令 | 1 天 |
-| **P4** | core/stage（merge、commit、hide） | 2 天 |
+| **P4** | core/stage（merge、commit、drop） | 2 天 |
 | **P5** | VS Code 扩展（SCM + Virtual FS + diff） | 3 天 |
 | **P6** | 测试 + 文档 + 发布 | 2 天 |
 | **合计** | | **~12 天** |

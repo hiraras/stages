@@ -170,35 +170,31 @@ stages commit -m "auth 模块改造" --force    # 脏工作区强制应用（覆
 
 ---
 
-## P4-07 实现 rename / hide / unhide
+## P4-07 实现 rename
 
-**描述：** stage 生命周期管理。
+**描述：** stage 重命名（生命周期管理的一部分）。
 
 **文件：** `src/core/stage/lifecycle.ts`
 
 **接口：**
 ```typescript
 rename(projectRoot: string, stageId: string, newName: string): Promise<void>
-hide(projectRoot: string, stageId: string): Promise<void>
-unhide(projectRoot: string, stageId: string): Promise<void>
 ```
 
 **规则：**
 | 操作 | 允许的状态 | 其他 |
 |------|-----------|------|
 | rename | pending, ready | committed 不可重命名 |
-| hide | committed | 设置 hidden = true |
-| unhide | committed（且 hidden） | 设置 hidden = false |
 
 **验收标准：**
 - [ ] rename 更新 meta.json 中的 name
-- [ ] hide 设置 hidden = true，list 默认不显示
-- [ ] unhide 设置 hidden = false，list 恢复显示
 - [ ] 对不允许的状态抛出明确错误
+
+> **注：** `hide` / `unhide` 命令已于后续版本移除；已 commit 历史通过 commit 列表与 `stages log` 审查。
 
 ---
 
-## P4-08 实现 rename / hide / unhide CLI 命令
+## P4-08 实现 rename CLI 命令
 
 **描述：** 对应 CLI 命令。
 
@@ -206,8 +202,6 @@ unhide(projectRoot: string, stageId: string): Promise<void>
 
 ```bash
 stages rename stage-auth "auth 模块 v2"
-stages hide stage-001
-stages unhide stage-001
 ```
 
 **验收标准：**
@@ -260,5 +254,4 @@ export type {
 - [ ] 脏工作区 commit 有 force 成功
 - [ ] rename pending stage 成功
 - [ ] rename committed stage 失败
-- [ ] hide / unhide 往返测试
-- [ ] list 默认隐藏 hidden stage
+- [ ] list 默认仅显示当前 cycle 的未隐藏 stage

@@ -11,7 +11,7 @@
 | P5-05 | 点击打开 vscode.diff | ✅ |
 | P5-06 | meta.json 监听自动刷新 | ✅ |
 | P5-07 | Rename 命令 | ✅ |
-| P5-08 | showHidden 配置 | ✅ |
+| P5-08 | ~~showHidden 配置~~（已移除） | — |
 | P5-09 | 手动测试清单 | 📋 test/acceptance/extension.md |
 
 **构建：** `npm run package:extension` → `extension/stages-vscode-0.1.0.vsix`

@@ -95,7 +95,7 @@
 - [x] 合并非连续 stage 报错
 - [x] 合并已提交 stage 报错
 - [x] stages rename 修改未提交 stage 名称
-- [x] stages hide 隐藏，list --all 可查看
+- [x] stages list --all 可查看含已 commit 的 stage 元数据
 - [x] stages commit -m 提交当前 cycle，创建 commit 节点，重置 stage ID
 - [x] stages log 查看 commit 历史
 - [x] stages verify 构建前门禁检查
@@ -104,7 +104,6 @@
 - [x] commit show 支持 --stat，--open 暂不支持
 - [x] stages -m 与 stages commit -m 无 Commander 冲突
 - [x] 脏工作区 commit 需 --force（CLI 层检测 + 覆盖行为已验证）
-- [x] stages hide 隐藏，list --all 可查看
 - [x] stages init 初始化；工作区有改动时自动创建第一个 stage
 - [x] commit 后 git add + git commit 正常
 
@@ -115,7 +114,7 @@
 - [x] stage 文件树 M/A/D 展示
 - [x] 点击文件打开 diff 视图
 - [x] meta.json 监听自动刷新
-- [x] Rename 命令与 showHidden 配置
+- [x] Rename 命令
 - [ ] 手动验收（见 test/acceptance/extension.md）
 - [ ] Cursor 兼容性手动验证
 

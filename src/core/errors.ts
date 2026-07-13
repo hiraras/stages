@@ -22,7 +22,6 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   GIT_NOT_FOUND: "Git is not installed or not available in PATH.",
   BLOB_CORRUPT: "Blob data is corrupted.",
   INVALID_RENAME: "Cannot rename this stage.",
-  INVALID_HIDE: "Cannot hide this stage.",
   INVALID_COMMIT: "Cannot commit this stage.",
   ALREADY_INITIALIZED: "Stages is already initialized.",
   PATH_TRAVERSAL: "Invalid file path detected.",

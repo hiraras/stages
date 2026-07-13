@@ -220,18 +220,11 @@ watcher.onDidCreate(() => scmProvider.refresh());
 
 ---
 
-## P5-08 隐藏 committed stage 过滤逻辑
+## P5-08 ~~隐藏 committed stage 过滤逻辑~~（已移除）
 
-**描述：** 默认不显示 hidden 的 committed stage。
+**原描述：** 默认不显示 hidden 的 committed stage；通过 `stages.showHidden` 设置控制。
 
-**实现：**
-- 调用 `stages.list()` 默认不传 `all`
-- 设置项 `stages.showHidden` 控制是否显示
-
-**验收标准：**
-- [ ] 默认面板不显示 hidden stage
-- [ ] 设置 `stages.showHidden: true` 后显示
-- [ ] committed 且 hidden 的 stage 显示为灰色
+**现状：** `hide` / `unhide` 命令与 `stages.showHidden` 配置已移除。扩展面板当前 cycle 仅显示活跃 stage；历史审查由 **commit 列表**（`stages log`）承担。`hidden` 字段仍用于内部（merge 吸收、commit 后归档）。
 
 ---
 

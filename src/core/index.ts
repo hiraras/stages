@@ -6,8 +6,6 @@ import { commit } from "./stage/commit.js";
 import { verify } from "./stage/verify.js";
 import { log } from "./stage/log.js";
 import {
-  hide,
-  unhide,
   list,
   rename,
   status,
@@ -34,8 +32,6 @@ export function createStagesAPI(): StagesAPI {
     drop,
     verify,
     log,
-    hide,
-    unhide,
     status,
     listUnstaged,
     readFile,

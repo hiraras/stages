@@ -23,7 +23,7 @@
 - [ ] stages rename 修改未提交 stage 名称
 - [ ] stages commit 应用改动到工作区，标记 committed
 - [ ] 脏工作区 commit 需 --force
-- [ ] stages hide 隐藏，list --all 可查看
+- [ ] stages list --all 可查看含已 commit 的 stage 元数据
 - [ ] stages init 初始化，首次 stages 自动初始化
 - [ ] commit 后 git add + git commit 正常
 

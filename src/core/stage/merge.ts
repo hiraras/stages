@@ -1,6 +1,6 @@
 import type { StageEntry } from "../../types/index.js";
 import { StagesError } from "../errors.js";
-import { resolveCumulative } from "../diff/resolver.js";
+import { resolveIncremental } from "../diff/resolver.js";
 import {
   areContiguousIds,
   normalizeStageInput,
@@ -95,7 +95,7 @@ export async function merge(
 
   rewirePrevPointers(projectRoot, absorbedIds, survivorId);
 
-  const diffResult = resolveCumulative(projectRoot, survivorId);
+  const diffResult = resolveIncremental(projectRoot, survivorId);
   updateStage(projectRoot, survivorId, { stats: diffResult.stats });
 
   return { ...getStage(projectRoot, survivorId), stats: diffResult.stats };
