@@ -28,6 +28,7 @@ import {
 } from "../store/manifest.js";
 import {
   getCurrentCycleStageEntry,
+  getLatestActiveStage,
   readMeta,
   removeStageEntries,
   stageEntryKey,
@@ -279,6 +280,31 @@ export function planDrop(projectRoot: string, inputId: string): DropPlan {
   };
 }
 
+function resolveDropDirtyCheckManifest(
+  projectRoot: string,
+  meta: StagesMeta,
+): Manifest {
+  const latest = getLatestActiveStage(meta);
+  if (latest) {
+    return readManifest(projectRoot, latest.id);
+  }
+
+  const baselineManifest = getBaselineManifest(projectRoot, meta);
+  if (baselineManifest) {
+    return baselineManifest;
+  }
+
+  return buildGitBaselineManifest(projectRoot, meta);
+}
+
+export async function detectDropDirtyFiles(
+  projectRoot: string,
+): Promise<Awaited<ReturnType<typeof detectDirtyFiles>>> {
+  const meta = readMeta(projectRoot);
+  const referenceManifest = resolveDropDirtyCheckManifest(projectRoot, meta);
+  return detectDirtyFiles(projectRoot, referenceManifest);
+}
+
 export async function drop(
   projectRoot: string,
   inputId: string,
@@ -287,7 +313,7 @@ export async function drop(
   const plan = planDrop(projectRoot, inputId);
 
   if (!opts?.force) {
-    const dirty = await detectDirtyFiles(projectRoot, plan.restoreManifest);
+    const dirty = await detectDropDirtyFiles(projectRoot);
     if (dirty.length > 0) {
       throw new StagesError(
         "DIRTY_WORKTREE",

@@ -2,7 +2,7 @@ import readline from "node:readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import type { DropPlan } from "../../types/index.js";
 import { StagesError } from "../../core/errors.js";
-import { detectDirtyFiles } from "../../core/git/dirty.js";
+import { detectDropDirtyFiles } from "../../core/stage/drop.js";
 import { api, getRoot, handleError, success, warn } from "../utils.js";
 
 async function confirmDrop(): Promise<boolean> {
@@ -45,7 +45,7 @@ export async function runDrop(
     const plan = api.planDrop(root, stageId);
 
     if (!force) {
-      const dirty = await detectDirtyFiles(root, plan.restoreManifest);
+      const dirty = await detectDropDirtyFiles(root);
       if (dirty.length > 0) {
         warn("Working tree has unstaged changes:");
         for (const file of dirty) {

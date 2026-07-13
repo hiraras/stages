@@ -134,6 +134,27 @@ describe("drop", () => {
     });
   });
 
+  it("allows drop when workspace matches latest stage but differs from restore target", async () => {
+    const root = createSimpleProject();
+    initTestRepo(root);
+    commitAll(root, "init");
+    await api.init(root);
+    await snapStages(root, 1);
+
+    fs.writeFileSync(
+      path.join(root, "src/config.ts"),
+      'export const APP_NAME = "staged in two";\n',
+    );
+    await api.snap(root, { message: "second stage" });
+
+    const result = await api.drop(root, "2");
+    expect(result.droppedIds).toEqual(["stage-002"]);
+    expect(result.restoreTarget).toMatchObject({
+      kind: "stage",
+      stageId: "stage-001",
+    });
+  });
+
   it("requires force when worktree is dirty", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
