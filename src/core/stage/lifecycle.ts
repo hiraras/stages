@@ -1,7 +1,6 @@
 import type { StageEntry, StatusSummary } from "../../types/index.js";
 import { StagesError } from "../errors.js";
-import { getManifestFileContent } from "../diff/engine.js";
-import { getFileAtCommit } from "../git/head.js";
+import { getBaselineFileContent, getManifestFileContent } from "../diff/engine.js";
 import { getPrevStageIdForEntry } from "../diff/resolver.js";
 import { resolveCommitId, resolveStageId } from "../store/id.js";
 import { readManifest } from "../store/manifest.js";
@@ -115,5 +114,5 @@ export async function readBaselineFile(
   filePath: string,
 ): Promise<Buffer | null> {
   const meta = readMeta(projectRoot);
-  return getFileAtCommit(projectRoot, meta.baseline, filePath);
+  return getBaselineFileContent(projectRoot, meta, filePath);
 }

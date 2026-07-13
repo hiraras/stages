@@ -2,8 +2,6 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { getFileAtCommit } from "../../core/git/head.js";
-import { getBaseline } from "../../core/stage/init.js";
 import { isCommitRef, resolveStageId } from "../../core/store/id.js";
 import { changeTypeLabel } from "../../core/store/manifest.js";
 import { getStage, readMeta } from "../../core/store/meta.js";
@@ -47,7 +45,7 @@ async function openDiff(stageId: string): Promise<void> {
       if (prevId) {
         oldContent = await api.readFile(root, prevId, file.path);
       } else {
-        oldContent = getFileAtCommit(root, getBaseline(root), file.path);
+        oldContent = await api.readBaselineFile(root, file.path);
       }
       const newContent = await api.readFile(root, stageId, file.path);
 
