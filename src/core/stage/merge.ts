@@ -3,8 +3,8 @@ import { StagesError } from "../errors.js";
 import { resolveCumulative } from "../diff/resolver.js";
 import {
   areContiguousIds,
+  normalizeStageInput,
   parseStageNumber,
-  resolveStageId,
   suggestContiguousRange,
 } from "../store/id.js";
 import { copyManifest, readManifest } from "../store/manifest.js";
@@ -61,7 +61,7 @@ export async function merge(
   }
 
   const meta = readMeta(projectRoot);
-  const resolvedIds = ids.map((id) => resolveStageId(meta, id));
+  const resolvedIds = ids.map((id) => normalizeStageInput(id));
   const sourceStages = validateMergeInputs(projectRoot, resolvedIds);
   const firstSource = sourceStages[0];
   const lastSource = sourceStages[sourceStages.length - 1];

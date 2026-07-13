@@ -385,6 +385,7 @@ export interface StagesAPI {
   merge(projectRoot: string, ids: string[], name: string): Promise<StageEntry>;
   rename(projectRoot: string, stageId: string, newName: string): Promise<void>;
   commit(projectRoot: string, opts: { message: string; force?: boolean }): Promise<CommitEntry>;
+  planDrop(projectRoot: string, stageId: string): DropPlan;
   drop(projectRoot: string, stageId: string, opts?: { force?: boolean }): Promise<DropResult>;
   verify(projectRoot: string): Promise<VerifyResult>;
   log(projectRoot: string): Promise<CommitEntry[]>;
@@ -452,15 +453,17 @@ export interface StagesAPI {
 ```
 输入：id = stage-N
 
-1. 解析序号 N，校验 stage 存在于当前 cycle
-2. 删除集合 = 当前 cycle 内所有序号 ≥ N 的 stage（含 merged hidden；不含 committed）
-3. 恢复目标 = max(序号 < N 的 active stage) manifest，或 cycle baseline
+1. 在当前 cycle 解析 pending/ready 目标（!commitId）；未找到 → DROP_STAGE_NOT_FOUND
+2. 删除集合 = 当前 cycle 内序号 ≥ N 的未 commit stage（含 merged hidden）
+3. 恢复目标 = max(序号 < N 的 pending/ready stage) manifest，或 cycle baseline
 4. 脏工作区检测（相对恢复目标）→ 用户确认（--yes 跳过）→ --force 可覆盖
 5. 应用恢复目标 manifest 到工作区
-6. 从 meta 移除删除集合；nextId 不变；删 manifest 文件，不 GC blob
+6. 按 id+createdAt 从 meta 移除删除集合；nextId 不变；删 manifest 文件，不 GC blob
 ```
 
 **ID 空洞：** 不重编号。例：drop 5 后 snap 得 stage-006，再 drop 4 会删 stage-004 与 stage-006。
+
+**跨 cycle 重复 ID：** 每次 commit 后 ID 重置，历史 stage 保留在 meta（带 `commitId`）。drop 只匹配/删除当前 cycle 条目，不会误操作历史 committed stage。
 
 ---
 
@@ -703,7 +706,8 @@ watcher.onDidChange(() => scmProvider.refresh());
 | 合并已提交 stage | `MERGE_INVALID_STATUS` | 列出冲突 stage 状态 |
 | 脏工作区 commit | `DIRTY_WORKTREE` | 列出未 stage 文件 + 提示 `--force`（`--force` 将覆盖未 stage 改动） |
 | 脏工作区 drop | `DIRTY_WORKTREE` | 同上（相对恢复目标 manifest 检测） |
-| drop 目标无效 | `DROP_INVALID_STATUS` | 说明不可 drop committed/merged stage |
+| drop 指定 ID 不存在（当前 cycle 无未 commit stage） | `DROP_STAGE_NOT_FOUND` | `No uncommitted stage with id stage-00N exists.` |
+| drop 目标 status 无效 | `DROP_INVALID_STATUS` | 说明仅可 drop pending/ready stage |
 | 用户取消 drop | `DROP_CANCELLED` | 不修改数据，退出 |
 | commit 不存在 | `COMMIT_NOT_FOUND` | 提示 commit ID 无效 |
 | 无新改动 snap | `SNAP_NO_CHANGES` | 输出 `No new changes.` |

@@ -178,13 +178,90 @@ describe("drop", () => {
   });
 });
 
-describe("drop entry validation", () => {
-  it("throws STAGE_NOT_FOUND for missing stage", async () => {
+describe("drop with duplicate stage ids across cycles", () => {
+  it("drops the current cycle stage, not an archived one with the same id", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
     commitAll(root, "init");
     await api.init(root);
 
-    await expect(api.drop(root, "9")).rejects.toBeInstanceOf(StagesError);
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 1; }\n",
+    );
+    await api.snap(root, { message: "cycle one" });
+    await api.commit(root, { message: "cycle one", force: true });
+
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 2; }\n",
+    );
+    await api.snap(root, { message: "first" });
+
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 3; }\n",
+    );
+    await api.snap(root, { message: "second" });
+
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 4; }\n",
+    );
+    await api.snap(root, { message: "third" });
+
+    const result = await api.drop(root, "3", { force: true });
+    expect(result.droppedIds).toEqual(["stage-003"]);
+
+    const list = await api.list(root);
+    expect(list.map((stage) => stage.id).sort()).toEqual([
+      "stage-001",
+      "stage-002",
+    ]);
+
+    const all = await api.list(root, { all: true });
+    expect(all.filter((stage) => stage.id === "stage-001" && stage.commitId)).toHaveLength(1);
+    expect(all.filter((stage) => stage.id === "stage-003")).toHaveLength(0);
+  });
+});
+
+describe("drop entry validation", () => {
+  it("throws DROP_STAGE_NOT_FOUND for missing uncommitted stage", async () => {
+    const root = createSimpleProject();
+    initTestRepo(root);
+    commitAll(root, "init");
+    await api.init(root);
+
+    await expect(api.drop(root, "9")).rejects.toMatchObject({
+      code: "DROP_STAGE_NOT_FOUND",
+      message: expect.stringContaining("stage-009"),
+    });
+  });
+
+  it("does not match committed stage with the same id from a previous cycle", async () => {
+    const root = createSimpleProject();
+    initTestRepo(root);
+    commitAll(root, "init");
+    await api.init(root);
+
+    for (let index = 1; index <= 4; index += 1) {
+      fs.writeFileSync(
+        path.join(root, "src/math.ts"),
+        `export function add(a: number, b: number) { return a + b + ${index}; }\n`,
+      );
+      await api.snap(root, { message: `stage ${index}` });
+    }
+    await api.commit(root, { message: "archived", force: true });
+
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 10; }\n",
+    );
+    await api.snap(root, { message: "only one" });
+
+    await expect(api.drop(root, "4")).rejects.toMatchObject({
+      code: "DROP_STAGE_NOT_FOUND",
+      message: expect.stringContaining("stage-004"),
+    });
   });
 });

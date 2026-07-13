@@ -322,11 +322,12 @@ npx stages drop 3 --force      # 强制覆盖工作区未 stage 改动
 
 **规则：**
 
-- 按 **stage ID 序号**截断：`drop N` 删除所有序号 ≥ N 的当前 cycle stage（含 ID 空洞，如 drop 4 会同时删 stage-004 与 stage-006）
+- **仅未 commit 的 stage**：只匹配当前 cycle 中 `pending` / `ready` 且无 `commitId` 的 stage；已 commit 的历史同名 stage 不会被匹配
+- 按 **stage ID 序号**截断：`drop N` 删除所有序号 ≥ N 的当前 cycle 未 commit stage（含 ID 空洞，如 drop 4 会同时删 stage-004 与 stage-006）
 - **不重编号** ID；`nextId` 不回收（删 stage-005 后下次 snap 仍为 stage-006）
-- 工作区恢复到序号 < N 的最大 active stage；`drop 1` 且无更早 stage 时恢复到 **cycle baseline**
+- 工作区恢复到序号 < N 的最大 pending/ready stage；`drop 1` 且无更早 stage 时恢复到 **cycle baseline**
 - 序号范围内 `merged` 状态的 hidden stage **一并删除**元数据
-- 仅 `pending` / `ready` 可作为 drop 入口；`committed` 不可 drop
+- 删除 meta 条目时按 `id + createdAt` 精确匹配，不误删历史同名 stage
 - 允许 `drop 1` 清空当前 cycle
 - 执行前需用户确认（CLI `[y/N]`；扩展确认对话框）；`--yes` 跳过 CLI 确认
 - 工作区有未 stage 改动：默认拒绝并列出文件；`--force` 强制覆盖（与 `commit` 一致）
@@ -336,8 +337,8 @@ npx stages drop 3 --force      # 强制覆盖工作区未 stage 改动
 
 **错误处理：**
 
-- 目标 stage 不存在 → 报错
-- 已 `committed` / 非当前 cycle → 报错拒绝
+- 当前 cycle 无指定 ID 的未 commit stage → `DROP_STAGE_NOT_FOUND`（`No uncommitted stage with id stage-00N exists.`）
+- 目标 status 非 pending/ready → `DROP_INVALID_STATUS`
 - 工作区有未 stage 改动 → 列出文件，提示 `--force`
 - 用户取消确认 → 不修改数据
 

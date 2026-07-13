@@ -19,7 +19,7 @@ import { resolveWithinProject } from "../paths.js";
 import { hashContent } from "../store/blob.js";
 import {
   parseStageNumber,
-  resolveStageId,
+  normalizeStageInput,
 } from "../store/id.js";
 import {
   compareManifests,
@@ -27,10 +27,54 @@ import {
   readManifest,
 } from "../store/manifest.js";
 import {
-  getCurrentCycleStages,
+  getCurrentCycleStageEntry,
   readMeta,
-  removeStages,
+  removeStageEntries,
+  stageEntryKey,
 } from "../store/meta.js";
+
+function isDroppableTarget(stage: StageEntry): boolean {
+  return stage.status === "pending" || stage.status === "ready";
+}
+
+function isInDropScope(stage: StageEntry): boolean {
+  return stage.status !== "committed";
+}
+
+function formatDropStageNotFound(stageId: string): StagesError {
+  return new StagesError(
+    "DROP_STAGE_NOT_FOUND",
+    `No uncommitted stage with id ${stageId} exists.`,
+  );
+}
+
+function resolveDroppableStageEntry(
+  meta: StagesMeta,
+  inputId: string,
+): StageEntry {
+  const stageId = normalizeStageInput(inputId);
+  const stage = getCurrentCycleStageEntry(meta, stageId);
+  if (!stage) {
+    throw formatDropStageNotFound(stageId);
+  }
+  if (!isDroppableTarget(stage)) {
+    throw new StagesError(
+      "DROP_INVALID_STATUS",
+      `Cannot drop stage ${stage.id} with status ${stage.status}. Only pending or ready stages in the current cycle can be dropped.`,
+    );
+  }
+  return stage;
+}
+
+function getDropScopeStagesByNumber(meta: StagesMeta): StageEntry[] {
+  return meta.stages
+    .filter((stage) => isCurrentCycleStage(stage) && isInDropScope(stage))
+    .sort((a, b) => getCycleStageNumber(a) - getCycleStageNumber(b));
+}
+
+function isCurrentCycleStage(stage: StageEntry): boolean {
+  return !stage.commitId;
+}
 
 function listTrackedFilesAtCommit(
   projectRoot: string,
@@ -56,24 +100,24 @@ function getCycleStageNumber(stage: StageEntry): number {
 }
 
 function getCurrentCycleStagesByNumber(meta: StagesMeta): StageEntry[] {
-  return getCurrentCycleStages(meta).sort(
-    (a, b) => getCycleStageNumber(a) - getCycleStageNumber(b),
-  );
+  return getDropScopeStagesByNumber(meta);
 }
 
-function validateDropEntry(stage: StageEntry): void {
-  if (stage.status !== "pending" && stage.status !== "ready") {
-    throw new StagesError(
-      "DROP_INVALID_STATUS",
-      `Cannot drop stage ${stage.id} with status ${stage.status}.`,
-    );
-  }
-}
-
-function collectDropSet(meta: StagesMeta, fromNumber: number): StageEntry[] {
-  return getCurrentCycleStagesByNumber(meta).filter(
+function collectDropSet(
+  meta: StagesMeta,
+  fromNumber: number,
+  target: StageEntry,
+): StageEntry[] {
+  const targetKey = stageEntryKey(target);
+  const stages = getCurrentCycleStagesByNumber(meta).filter(
     (stage) => getCycleStageNumber(stage) >= fromNumber,
   );
+
+  if (!stages.some((stage) => stageEntryKey(stage) === targetKey)) {
+    throw formatDropStageNotFound(target.id);
+  }
+
+  return stages;
 }
 
 function findRestoreStage(
@@ -203,22 +247,16 @@ function restoreToGitBaseline(
 
 export function planDrop(projectRoot: string, inputId: string): DropPlan {
   const meta = readMeta(projectRoot);
-  const resolvedId = resolveStageId(meta, inputId);
-  const targetStage = meta.stages.find((stage) => stage.id === resolvedId);
-  if (!targetStage) {
-    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${resolvedId}`);
-  }
-
-  validateDropEntry(targetStage);
+  const targetStage = resolveDroppableStageEntry(meta, inputId);
 
   const fromNumber = getCycleStageNumber(targetStage);
-  const droppedStages = collectDropSet(meta, fromNumber);
+  const droppedStages = collectDropSet(meta, fromNumber, targetStage);
   if (droppedStages.length === 0) {
-    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${resolvedId}`);
+    throw formatDropStageNotFound(targetStage.id);
   }
 
   for (const stage of droppedStages) {
-    if (stage.status === "committed") {
+    if (stage.status === "committed" || stage.commitId) {
       throw new StagesError(
         "DROP_INVALID_STATUS",
         `Cannot drop committed stage ${stage.id}.`,
@@ -233,7 +271,7 @@ export function planDrop(projectRoot: string, inputId: string): DropPlan {
   const affectedFiles = compareManifests(fromManifest, restoreManifest);
 
   return {
-    targetId: resolvedId,
+    targetId: targetStage.id,
     droppedStages,
     restoreTarget,
     restoreManifest,
@@ -268,8 +306,8 @@ export async function drop(
     plan.restoreTarget,
   );
 
+  removeStageEntries(projectRoot, plan.droppedStages);
   const droppedIds = plan.droppedStages.map((stage) => stage.id);
-  removeStages(projectRoot, droppedIds);
   for (const stageId of droppedIds) {
     deleteManifest(projectRoot, stageId);
   }

@@ -31,5 +31,6 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   COMMIT_NO_STAGES: "No stages to commit in the current cycle.",
   COMMIT_NOT_FOUND: "Commit not found.",
   DROP_INVALID_STATUS: "Cannot drop this stage.",
+  DROP_STAGE_NOT_FOUND: "No uncommitted stage with the specified id exists.",
   DROP_CANCELLED: "Drop cancelled.",
 };

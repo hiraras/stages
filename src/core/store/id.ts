@@ -1,5 +1,32 @@
-import type { StagesMeta } from "../../types/index.js";
+import type { StageEntry, StagesMeta } from "../../types/index.js";
 import { StagesError } from "../errors.js";
+
+export function normalizeStageInput(input: string): string {
+  const trimmed = input.trim();
+  if (trimmed.startsWith("stage-")) {
+    return trimmed;
+  }
+
+  const sequence = Number.parseInt(trimmed, 10);
+  if (Number.isNaN(sequence)) {
+    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${input}`);
+  }
+
+  return formatStageId(sequence);
+}
+
+function getCurrentCycleStageEntry(
+  meta: StagesMeta,
+  id: string,
+): StageEntry | undefined {
+  for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
+    const stage = meta.stages[index]!;
+    if (stage.id === id && !stage.commitId) {
+      return stage;
+    }
+  }
+  return undefined;
+}
 
 export function formatCommitId(sequence: number): string {
   return `commit-${String(sequence).padStart(3, "0")}`;
@@ -61,31 +88,49 @@ export function resolveCommitId(meta: StagesMeta, input: string): string {
   return commit.id;
 }
 
-export function resolveStageId(meta: StagesMeta, input: string): string {
-  const trimmed = input.trim();
-
-  if (trimmed.startsWith("stage-")) {
-    const stage = meta.stages.find((item) => item.id === trimmed);
-    if (!stage) {
-      throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${trimmed}`);
-    }
-    return stage.id;
-  }
-
-  const sequence = Number.parseInt(trimmed, 10);
-  if (Number.isNaN(sequence)) {
-    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${input}`);
-  }
-
-  const stageId = formatStageId(sequence);
-  const currentCycleStage = meta.stages.find(
-    (item) => item.id === stageId && !item.commitId,
-  );
-  if (!currentCycleStage) {
+function resolveCurrentCycleStageEntry(
+  meta: StagesMeta,
+  stageId: string,
+): StageEntry {
+  const stage = getCurrentCycleStageEntry(meta, stageId);
+  if (!stage) {
     throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${stageId}`);
   }
+  return stage;
+}
 
-  return currentCycleStage.id;
+export function getCommittedStageEntry(
+  meta: StagesMeta,
+  id: string,
+): StageEntry | undefined {
+  for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
+    const stage = meta.stages[index]!;
+    if (stage.id === id && stage.commitId) {
+      return stage;
+    }
+  }
+  return undefined;
+}
+
+export function resolveCommittedStageEntry(
+  meta: StagesMeta,
+  input: string,
+): StageEntry {
+  const stageId = normalizeStageInput(input);
+  const stage = getCommittedStageEntry(meta, stageId);
+  if (!stage) {
+    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${stageId}`);
+  }
+  return stage;
+}
+
+export function resolveStageEntry(meta: StagesMeta, input: string): StageEntry {
+  const stageId = normalizeStageInput(input);
+  return resolveCurrentCycleStageEntry(meta, stageId);
+}
+
+export function resolveStageId(meta: StagesMeta, input: string): string {
+  return resolveStageEntry(meta, input).id;
 }
 
 export function areContiguousIds(ids: string[]): boolean {

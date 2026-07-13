@@ -3,9 +3,9 @@ import { StagesError } from "../errors.js";
 import { getManifestFileContent } from "../diff/engine.js";
 import { getFileAtCommit } from "../git/head.js";
 import { getPrevStageIdForEntry } from "../diff/resolver.js";
-import { resolveCommitId, resolveStageId } from "../store/id.js";
+import { resolveCommitId, resolveCommittedStageEntry, resolveStageId } from "../store/id.js";
 import { readManifest } from "../store/manifest.js";
-import { findStages, getCommit, getStage, readMeta, updateStage } from "../store/meta.js";
+import { findStages, getCommit, getStage, readMeta, updateStage, updateStageEntry } from "../store/meta.js";
 
 export async function rename(
   projectRoot: string,
@@ -32,8 +32,7 @@ export async function rename(
 
 export async function hide(projectRoot: string, stageId: string): Promise<void> {
   const meta = readMeta(projectRoot);
-  const resolvedId = resolveStageId(meta, stageId);
-  const stage = getStage(projectRoot, resolvedId);
+  const stage = resolveCommittedStageEntry(meta, stageId);
 
   if (stage.status !== "committed") {
     throw new StagesError(
@@ -42,7 +41,7 @@ export async function hide(projectRoot: string, stageId: string): Promise<void> 
     );
   }
 
-  updateStage(projectRoot, resolvedId, { hidden: true });
+  updateStageEntry(projectRoot, stage, { hidden: true });
 }
 
 export async function unhide(
@@ -50,8 +49,7 @@ export async function unhide(
   stageId: string,
 ): Promise<void> {
   const meta = readMeta(projectRoot);
-  const resolvedId = resolveStageId(meta, stageId);
-  const stage = getStage(projectRoot, resolvedId);
+  const stage = resolveCommittedStageEntry(meta, stageId);
 
   if (stage.status !== "committed") {
     throw new StagesError(
@@ -60,7 +58,7 @@ export async function unhide(
     );
   }
 
-  updateStage(projectRoot, resolvedId, { hidden: false });
+  updateStageEntry(projectRoot, stage, { hidden: false });
 }
 
 export async function list(

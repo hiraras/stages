@@ -122,6 +122,7 @@ export type ErrorCode =
   | "COMMIT_NO_STAGES"
   | "COMMIT_NOT_FOUND"
   | "DROP_INVALID_STATUS"
+  | "DROP_STAGE_NOT_FOUND"
   | "DROP_CANCELLED";
 
 export interface UnstagedResult {

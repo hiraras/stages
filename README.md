@@ -73,8 +73,8 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
     - unstaged：左 = 最新 stage / baseline，右 = 工作区文件
     - stage：左 = 上一 stage / git HEAD，右 = 当前 stage
     - commit：语义同 `stages show commit-001`
-- 编辑工作区文件后 Unstaged 区域自动更新；`stages -m` / `stages commit` 后全量刷新
-- 右键 stage 可 Rename（仅 pending / ready）；commit 只读
+- 编辑工作区文件后 Unstaged 区域自动更新；`stages -m` / `stages commit` / `stages drop` 后全量刷新
+- 右键 stage 可 Rename 或 Drop stage…（仅 pending / ready）；commit 只读
 - 设置 `stages.showHidden: true` 显示已隐藏的 archived stage
 
 手动验收清单见 [test/acceptance/extension.md](./test/acceptance/extension.md)。
@@ -91,7 +91,7 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
 | `stages commit -m "msg" [--force]`   | 提交当前 cycle 到工作区   |
 | `stages log`                         | 查看 commit 历史          |
 | `stages verify`                      | 构建前门禁                |
-| `stages drop <id> [--yes] [--force]` | 删除序号 ≥ N 的 stage，还原工作区 |
+| `stages drop <id> [--yes] [--force]` | 删除序号 ≥ N 的未 commit stage，还原工作区 |
 | `stages hide/unhide <id>`            | 隐藏/显示 committed stage |
 
 **show ID 格式：** stage 用 `1` / `stage-001`；commit 用 `commit-001` / `c1`。

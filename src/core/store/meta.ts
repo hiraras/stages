@@ -57,13 +57,69 @@ export function addStage(projectRoot: string, entry: StageEntry): void {
   writeMeta(projectRoot, meta);
 }
 
+export function stageEntryKey(stage: StageEntry): string {
+  return `${stage.id}\0${stage.createdAt}`;
+}
+
+function findStageIndex(
+  meta: StagesMeta,
+  id: string,
+  opts?: { preferCurrentCycle?: boolean },
+): number {
+  if (opts?.preferCurrentCycle) {
+    for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
+      const stage = meta.stages[index]!;
+      if (stage.id === id && !stage.commitId) {
+        return index;
+      }
+    }
+  }
+
+  for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
+    if (meta.stages[index]!.id === id) {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+export function getCurrentCycleStageEntry(
+  meta: StagesMeta,
+  id: string,
+): StageEntry | undefined {
+  for (let index = meta.stages.length - 1; index >= 0; index -= 1) {
+    const stage = meta.stages[index]!;
+    if (stage.id === id && !stage.commitId) {
+      return stage;
+    }
+  }
+  return undefined;
+}
+
+export function updateStageEntry(
+  projectRoot: string,
+  entry: StageEntry,
+  patch: Partial<StageEntry>,
+): void {
+  const meta = readMeta(projectRoot);
+  const key = stageEntryKey(entry);
+  const index = meta.stages.findIndex((stage) => stageEntryKey(stage) === key);
+  if (index === -1) {
+    throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${entry.id}`);
+  }
+
+  meta.stages[index] = { ...meta.stages[index], ...patch };
+  writeMeta(projectRoot, meta);
+}
+
 export function updateStage(
   projectRoot: string,
   id: string,
   patch: Partial<StageEntry>,
 ): void {
   const meta = readMeta(projectRoot);
-  const index = meta.stages.findIndex((stage) => stage.id === id);
+  const index = findStageIndex(meta, id, { preferCurrentCycle: true });
   if (index === -1) {
     throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${id}`);
   }
@@ -74,11 +130,17 @@ export function updateStage(
 
 export function getStage(projectRoot: string, id: string): StageEntry {
   const meta = readMeta(projectRoot);
-  const stage = meta.stages.find((item) => item.id === id);
-  if (!stage) {
+  const currentCycle = getCurrentCycleStageEntry(meta, id);
+  if (currentCycle) {
+    return currentCycle;
+  }
+
+  const index = findStageIndex(meta, id);
+  if (index === -1) {
     throw new StagesError("STAGE_NOT_FOUND", `Stage not found: ${id}`);
   }
-  return stage;
+
+  return meta.stages[index]!;
 }
 
 export function findStages(
@@ -206,14 +268,19 @@ export function archiveCurrentCycle(
   writeMeta(projectRoot, meta);
 }
 
-export function removeStages(projectRoot: string, ids: string[]): void {
-  if (ids.length === 0) {
+export function removeStageEntries(
+  projectRoot: string,
+  entries: StageEntry[],
+): void {
+  if (entries.length === 0) {
     return;
   }
 
   const meta = readMeta(projectRoot);
-  const idSet = new Set(ids);
-  meta.stages = meta.stages.filter((stage) => !idSet.has(stage.id));
+  const keys = new Set(entries.map(stageEntryKey));
+  meta.stages = meta.stages.filter(
+    (stage) => !keys.has(stageEntryKey(stage)),
+  );
   writeMeta(projectRoot, meta);
 }
 

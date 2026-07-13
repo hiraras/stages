@@ -60,15 +60,26 @@ stages drop <id> [--yes] [--force]
 
 ### 3.3 核心规则
 
-1. **按序号截断**：`drop N` 删除序号 **≥ N** 的所有当前 cycle stage（含 N）；若 N 等于当前最大序号且只有一个，则只删一个。
-2. **工作区还原**：恢复到「序号 < N 的最大 active stage」的 manifest；若无（即 `drop 1`），恢复到 **cycle baseline manifest**。
-3. **作用域**：仅当前 cycle；`committed` 归档 stage 不可 drop；不修改 commit 历史。
-4. **用户确认**：CLI 默认 `[y/N]` 交互；扩展使用确认对话框；`--yes` 可跳过 CLI 确认。
-5. **脏工作区**：相对**恢复目标** manifest 检测未 stage 改动；默认拒绝并列出文件；`--force` 强制覆盖。
-6. **允许清空 cycle**：`drop 1` 可删除全部 active stage，之后可继续 `stages -m` 新建 stage。
-7. **不 GC blob**：MVP 仅删 meta 条目与 manifest 文件，blob 留待后续 `stages gc`。
+1. **仅未 commit 的 stage**：drop 只作用于当前 cycle 中 `pending` / `ready` 的 stage（无 `commitId`）。已 commit 的历史 stage **不会被匹配或删除**，即使 ID 相同（如历史 `stage-004` 与当前 cycle 无关）。
+2. **按序号截断**：`drop N` 删除序号 **≥ N** 的所有当前 cycle 未 commit stage（含 N）；若 N 等于当前最大序号且只有一个，则只删一个。
+3. **工作区还原**：恢复到「序号 < N 的最大 pending/ready stage」的 manifest；若无（即 `drop 1`），恢复到 **cycle baseline manifest**。
+4. **作用域**：不修改 commit 历史；删除 meta 条目时按 `id + createdAt` 精确匹配，避免误删历史同名 stage。
+5. **用户确认**：CLI 默认 `[y/N]` 交互；扩展使用确认对话框；`--yes` 可跳过 CLI 确认。
+6. **脏工作区**：相对**恢复目标** manifest 检测未 stage 改动；默认拒绝并列出文件；`--force` 强制覆盖。
+7. **允许清空 cycle**：`drop 1` 可删除全部 active stage，之后可继续 `stages -m` 新建 stage。
+8. **不 GC blob**：MVP 仅删 meta 条目与 manifest 文件，blob 留待后续 `stages gc`。
 
-### 3.4 CLI 交互示例
+### 3.4 找不到指定 ID
+
+当前 cycle 中不存在指定 ID 的未 commit stage 时（例如只有 stage-001/002/003 却执行 `drop 4`，或历史上存在 committed 的 stage-004 但当前 cycle 没有）：
+
+```
+✗ Error: No uncommitted stage with id stage-004 exists.
+```
+
+错误码：`DROP_STAGE_NOT_FOUND`
+
+### 3.5 CLI 交互示例
 
 ```
 $ stages drop 3
@@ -87,7 +98,7 @@ $ stages drop 3
   Worktree restored to stage-002
 ```
 
-### 3.5 ID 空洞示例
+### 3.6 ID 空洞示例
 
 ```
 $ stages list
@@ -122,39 +133,46 @@ $ stages drop 4
 | Core | `src/core/stage/drop.ts` | 校验、计算删除范围、还原工作区、更新 meta |
 | CLI | `src/cli/commands/drop.ts` | 参数解析、交互确认、`--yes` / `--force` |
 | 扩展 | `extension/src/commands/drop.ts` | 右键 Drop stage… + 确认对话框 |
-| API | `src/core/index.ts` | 暴露 `drop(projectRoot, id, opts?)` |
+| API | `src/core/index.ts` | 暴露 `planDrop()` / `drop()` |
 
 ### 4.2 算法
 
 ```
 输入：id = stage-N
 
-1. 解析 id → 序号 N，校验 stage 存在于当前 cycle
-2. 取当前 cycle 全部 stage 条目（含 merged hidden）
-3. 删除集合 = { stage | 序号(stage) ≥ N }
-   - 校验：删除集合中不能有 committed 条目（若有则 DROP_INVALID_STATUS）
-4. 恢复目标：
-   - activeRestore = max { stage | 序号(stage) < N 且 status ∈ {pending, ready} }
-   - 若 activeRestore 存在 → 取其 manifest
-   - 否则 → getBaselineManifest(projectRoot)
-5. 脏工作区检测（相对恢复目标 manifest）；未 --force 则拒绝
-6. 用户确认（CLI 交互 / 扩展对话框 / --yes 跳过）
-7. 应用恢复目标 manifest 到工作区
-8. 从 meta.stages 移除删除集合中的全部条目
-9. nextId 不变（不回收）
-10. 删除对应 manifests/*.json；不清理 blob
+1. 解析 id → stage-00N，在当前 cycle 中查找 pending/ready 条目（!commitId）
+   - 未找到 → DROP_STAGE_NOT_FOUND
+2. 删除集合 = { 当前 cycle 未 commit stage | 序号(stage) ≥ N }
+   - 含序号范围内 status = merged 的 hidden stage
+   - 不含任何 committed 条目
+3. 恢复目标 = max(序号 < N 的 pending/ready stage) manifest，或 cycle baseline
+4. 脏工作区检测（相对恢复目标）；未 --force 则拒绝
+5. 用户确认（CLI / 扩展 / --yes）
+6. 应用恢复目标 manifest 到工作区
+7. 按 id+createdAt 从 meta.stages 移除删除集合（不删历史同名 stage）
+8. nextId 不变；删对应 manifest 文件；不 GC blob
 ```
 
-### 4.3 错误码
+### 4.3 跨 cycle 重复 ID
+
+每次 `commit` 后 stage ID 从 001 重新计数，但历史 stage 仍保留在 `meta.json`（带 `commitId`）。drop 解析与删除均**只针对当前 cycle**：
+
+| 操作 | 行为 |
+|------|------|
+| 解析 `drop 3` | 匹配当前 cycle 无 `commitId` 的 `stage-003`，忽略历史 committed 同名条目 |
+| 删除 | 按 `id + createdAt` 精确移除，不误删历史 stage |
+| `drop 4` 且当前仅有 001/002/003 | `DROP_STAGE_NOT_FOUND`（即使历史存在 committed 的 stage-004） |
+
+### 4.4 错误码
 
 | 场景 | 错误码 | 处理 |
 |------|--------|------|
-| stage 不存在 | `STAGE_NOT_FOUND` | 列出可用 ID |
-| 已 committed / 非当前 cycle | `DROP_INVALID_STATUS` | 说明不可 drop |
+| 当前 cycle 无指定 ID 的未 commit stage | `DROP_STAGE_NOT_FOUND` | `No uncommitted stage with id stage-00N exists.` |
+| 目标 status 非 pending/ready | `DROP_INVALID_STATUS` | 说明仅可 drop 未 commit stage |
 | 脏工作区且未 `--force` | `DIRTY_WORKTREE` | 列出文件 + 提示 `--force` |
 | 用户取消确认 | `DROP_CANCELLED` | 不修改数据，exit 0 |
 
-### 4.4 与现有命令的关系
+### 4.5 与现有命令的关系
 
 | 命令 | 对比 |
 |------|------|
@@ -162,7 +180,7 @@ $ stages drop 4
 | `drop` | **物理删除** stage 元数据与 manifest，**并还原工作区** |
 | `commit --force` | 用最新 stage 覆盖工作区；drop 是用更早 stage / baseline 覆盖 |
 
-### 4.5 扩展交互（已确认同步实现）
+### 4.6 扩展交互（已确认同步实现）
 
 - 右键 pending / ready stage → **Drop stage…**
 - 对话框展示：将删除的 stage 列表（含同序号范围内所有 stage）、恢复目标
@@ -205,3 +223,4 @@ $ stages drop 4
 |------|------|
 | 2026-07-12 | 初稿：语义、算法、待确认问题 |
 | 2026-07-12 | 全部决策已确认；补充 ID 空洞截断规则与扩展示例 |
+| 2026-07-13 | 明确仅匹配未 commit stage；新增 DROP_STAGE_NOT_FOUND；跨 cycle 重复 ID 解析与精确删除 |

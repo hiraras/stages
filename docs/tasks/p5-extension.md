@@ -312,10 +312,11 @@ Source Control: Stages
 3. 确认后执行 drop，刷新 SCM 面板
 
 **验收标准：**
-- [ ] pending / ready stage 显示 Drop 菜单项
-- [ ] committed stage 不显示 Drop
-- [ ] drop 3 时对话框列出 stage-003、004、005（或含 stage-006 等空洞 ID）
-- [ ] 取消对话框不修改数据
-- [ ] 成功后工作区与 CLI `stages drop` 一致
-- [ ] meta.json 变更后自动刷新面板
+- [x] pending / ready stage 显示 Drop 菜单项
+- [x] committed stage 不显示 Drop
+- [x] drop 3 时对话框列出 stage-003、004、005（或含 stage-006 等空洞 ID）
+- [x] 取消对话框不修改数据
+- [x] 成功后工作区与 CLI `stages drop` 一致
+- [x] meta.json 变更后自动刷新面板
+- [x] 不匹配历史 cycle 中 committed 的同名 stage
 
