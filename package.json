@@ -1,6 +1,6 @@
 {
-  "name": "stages",
-  "version": "0.1.0",
+  "name": "@hirara/stages",
+  "version": "1.0.0",
   "description": "Cross-session code staging layer for AI-assisted development",
   "type": "module",
   "main": "./dist/index.js",

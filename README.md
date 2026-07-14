@@ -7,9 +7,9 @@
 ## 安装
 
 ```bash
-npm install -g stages
+npm install -g @hirara/stages
 # 或
-npx stages <command>
+npx @hirara/stages <command>
 ```
 
 要求：Node.js >= 18，项目为 git 仓库。
@@ -113,17 +113,15 @@ AI 改代码 → stages -m "描述" → 扩展/CLI 审查 diff
 
 ## 文档
 
-产品规格与实现说明在 **`docs2/`**（分层文档）：
+产品规格与实现说明在 **`docs/`**（分层文档）：
 
 | 文档 | 内容 |
 |------|------|
-| [docs2/requirements.md](./docs2/requirements.md) | 需求 |
-| [docs2/business-flow.md](./docs2/business-flow.md) | 流程总纲 |
-| [docs2/features/](./docs2/features/) | 各流程细则 |
-| [docs2/system-design.md](./docs2/system-design.md) | 系统设计 |
-| [docs2/tasks/project/](./docs2/tasks/project/) | 任务与 [进度](./docs2/tasks/project/process.md) |
-
-旧版 `docs/` 仅作历史参考，以 `docs2/` 为准。
+| [docs/requirements.md](./docs/requirements.md) | 需求 |
+| [docs/business-flow.md](./docs/business-flow.md) | 流程总纲 |
+| [docs/features/](./docs/features/) | 各流程细则 |
+| [docs/system-design.md](./docs/system-design.md) | 系统设计 |
+| [docs/tasks/project/](./docs/tasks/project/) | 任务与 [进度](./docs/tasks/project/process.md) |
 
 ## 开发
 
