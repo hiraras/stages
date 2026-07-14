@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { createStagesAPI } from "stages";
+import { createStagesAPI } from "@hiraras/stages";
 
 const BASELINE_AUTHORITY = "baseline";
 const GIT_HEAD_AUTHORITY = "git-head";

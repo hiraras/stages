@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { createStagesAPI, StagesError } from "stages";
+import { createStagesAPI, StagesError } from "@hiraras/stages";
 
 const api = createStagesAPI();
 

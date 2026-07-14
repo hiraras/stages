@@ -1,6 +1,6 @@
 import * as vscode from "vscode";
-import type { DropPlan } from "stages";
-import { createStagesAPI, StagesError } from "stages";
+import type { DropPlan } from "@hiraras/stages";
+import { createStagesAPI, StagesError } from "@hiraras/stages";
 
 const api = createStagesAPI();
 

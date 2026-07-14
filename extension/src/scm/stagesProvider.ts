@@ -6,7 +6,7 @@ import {
   type FileChangeType,
   type StageEntry,
   type UnstagedResult,
-} from "stages";
+} from "@hiraras/stages";
 import {
   buildBaselineUri,
   buildCommitUri,
