@@ -29,7 +29,7 @@ describe("acceptance: CLI requirements §12.1", () => {
     expect(list[0]?.name).toBe("after rename");
   });
 
-  it("rejects merge on committed stage", async () => {
+  it("rejects merge on stages from a previous cycle", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
     commitAll(root, "init");
@@ -49,9 +49,10 @@ describe("acceptance: CLI requirements §12.1", () => {
 
     await api.commit(root, { message: "done", force: true });
 
+    // Archived stages are not in the current cycle (STAGE_NOT_FOUND), not mergeable.
     await expect(
       api.merge(root, ["stage-001", "stage-002"], "should fail"),
-    ).rejects.toMatchObject({ code: "MERGE_INVALID_STATUS" });
+    ).rejects.toMatchObject({ code: "STAGE_NOT_FOUND" });
   });
 
   it("dirty worktree commit requires force", async () => {

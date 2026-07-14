@@ -7,7 +7,13 @@ import {
   type StageEntry,
   type UnstagedResult,
 } from "stages";
-import { buildBaselineUri, buildCommitUri, buildEmptyUri, buildStageUri } from "../fs/stagesFs.js";
+import {
+  buildBaselineUri,
+  buildCommitUri,
+  buildEmptyUri,
+  buildGitHeadUri,
+  buildStageUri,
+} from "../fs/stagesFs.js";
 
 const api = createStagesAPI();
 export const UNSTAGED_GROUP_ID = "__unstaged__";
@@ -119,12 +125,14 @@ export class StagesSCMProvider implements vscode.Disposable {
       return;
     }
     this.expandedGroups.delete(groupId);
+    const snapshot = await this.loadSnapshot();
     const group = this.groups.get(groupId);
     if (group) {
       group.resourceStates = [];
-      this.setGroupContext(group, groupId);
+      const stage = snapshot.visibleStages.find((item) => item.id === groupId);
+      this.setGroupContext(group, groupId, stage?.status);
     }
-    void this.syncPanelAnchor(await this.loadSnapshot());
+    this.syncPanelAnchor(snapshot);
   }
 
   dispose(): void {
@@ -350,7 +358,11 @@ export class StagesSCMProvider implements vscode.Disposable {
     return previousLabels.get(groupId) !== label;
   }
 
-  private setGroupContext(group: vscode.SourceControlResourceGroup, groupId: string): void {
+  private setGroupContext(
+    group: vscode.SourceControlResourceGroup,
+    groupId: string,
+    stageStatus?: StageEntry["status"],
+  ): void {
     if (groupId === HINT_GROUP_ID) {
       group.contextValue = "hint";
       return;
@@ -359,11 +371,16 @@ export class StagesSCMProvider implements vscode.Disposable {
       group.contextValue = "files-visible-unstaged";
       return;
     }
-    if (!this.shouldShowFiles(groupId)) {
-      group.contextValue = "files-hidden";
+    const filesState = this.shouldShowFiles(groupId) ? "files-visible" : "files-hidden";
+    if (stageStatus === "pending" || stageStatus === "ready") {
+      group.contextValue = `${filesState}-stage-${stageStatus}`;
       return;
     }
-    group.contextValue = "files-visible";
+    if (groupId.startsWith("commit-")) {
+      group.contextValue = `${filesState}-commit`;
+      return;
+    }
+    group.contextValue = filesState;
   }
 
   private configureGroup(group: vscode.SourceControlResourceGroup): void {
@@ -398,7 +415,7 @@ export class StagesSCMProvider implements vscode.Disposable {
     }
 
     this.configureGroup(group);
-    this.setGroupContext(group, stage.id);
+    this.setGroupContext(group, stage.id, stage.status);
     this.groupLabels.set(stage.id, label);
 
     if (!this.shouldShowFiles(stage.id)) {
@@ -512,7 +529,7 @@ export class StagesSCMProvider implements vscode.Disposable {
     }
 
     const diff = api.show(this.projectRoot, commit.id);
-    const useBaseline = prevId === null;
+    const useGitHead = prevId === null;
 
     group.resourceStates = diff.files.map((file) =>
       this.buildResourceState({
@@ -522,8 +539,8 @@ export class StagesSCMProvider implements vscode.Disposable {
         leftUri:
           file.type === "added"
             ? buildEmptyUri(file.path)
-            : useBaseline
-              ? buildBaselineUri(file.path)
+            : useGitHead
+              ? buildGitHeadUri(file.path)
               : buildCommitUri(prevId!, file.path),
         rightUri:
           file.type === "deleted"

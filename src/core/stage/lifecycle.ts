@@ -2,6 +2,7 @@ import type { StageEntry, StatusSummary } from "../../types/index.js";
 import { StagesError } from "../errors.js";
 import { getBaselineFileContent, getManifestFileContent } from "../diff/engine.js";
 import { getPrevStageIdForEntry } from "../diff/resolver.js";
+import { getFileAtCommit } from "../git/head.js";
 import { resolveCommitId, resolveStageId } from "../store/id.js";
 import { readManifest } from "../store/manifest.js";
 import { findStages, getCommit, getStage, readMeta, updateStage } from "../store/meta.js";
@@ -115,4 +116,13 @@ export async function readBaselineFile(
 ): Promise<Buffer | null> {
   const meta = readMeta(projectRoot);
   return getBaselineFileContent(projectRoot, meta, filePath);
+}
+
+/** File content at initial git HEAD (`meta.baseline`), for commit-001 left pane / CLI parity. */
+export async function readGitHeadFile(
+  projectRoot: string,
+  filePath: string,
+): Promise<Buffer | null> {
+  const meta = readMeta(projectRoot);
+  return getFileAtCommit(projectRoot, meta.baseline, filePath);
 }

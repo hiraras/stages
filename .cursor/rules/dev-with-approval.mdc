@@ -1,0 +1,21 @@
+---
+description: Require approved plans before code changes; sync docs/business-flow.md after behavior changes.
+alwaysApply: true
+---
+
+# Dev With Approval (project gate)
+
+Before any non-trivial code change: present a plan (and business flow when behavior changes), then **wait for explicit user approval**. Do not invent scope.
+
+## Levels
+
+- **Skip:** Q&A, read-only, no-behavior typos, or continuing an already-approved plan.
+- **Light:** User `@`'d file(s), small clear edit → short bullets → wait.
+- **Full:** New feature / multi-file / flow-API change → full proposal → wait.
+
+## Must follow
+
+1. No create/edit/delete until approval (Light/Full).
+2. Only edit approved or `@`'d paths; other needed files → list and stop.
+3. After behavior changes, update **only affected sections** of `docs/business-flow.md`.
+4. For full workflow and templates, follow the `dev-with-approval` skill.

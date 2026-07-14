@@ -11,19 +11,21 @@ const DEFAULT_IGNORE = [
   "node_modules/**",
 ];
 
-function loadGitignore(projectRoot: string): ReturnType<typeof ignore> {
+function loadIgnoreRules(projectRoot: string): ReturnType<typeof ignore> {
   const ig = ignore().add(DEFAULT_IGNORE);
-  const gitignorePath = path.join(projectRoot, ".gitignore");
 
-  if (fs.existsSync(gitignorePath)) {
-    ig.add(fs.readFileSync(gitignorePath, "utf8"));
+  for (const fileName of [".gitignore", ".stagesignore"] as const) {
+    const filePath = path.join(projectRoot, fileName);
+    if (fs.existsSync(filePath)) {
+      ig.add(fs.readFileSync(filePath, "utf8"));
+    }
   }
 
   return ig;
 }
 
 export async function scanWorkspace(projectRoot: string): Promise<ScannedFile[]> {
-  const ig = loadGitignore(projectRoot);
+  const ig = loadIgnoreRules(projectRoot);
   const entries = await fg("**/*", {
     cwd: projectRoot,
     onlyFiles: true,

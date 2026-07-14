@@ -1,0 +1,5 @@
+---
+alwaysApply: true
+---
+
+变更闸门（全局）：凡 Light/Full 级代码改动，须先给出方案（行为变更含业务流程），等用户明确同意（同意/可以/按方案做/LGTM）后再改；禁止扩大范围。只修改用户 @ 或已批准的文件，其它文件只提示。行为变更后同步更新项目 docs/business-flow.md 的相关章节。细节遵循 skill：dev-with-approval。

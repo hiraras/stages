@@ -14,6 +14,7 @@ import {
   getPrevStageId,
   getPrevCommitId,
   readBaselineFile,
+  readGitHeadFile,
 } from "./stage/lifecycle.js";
 import { drop, planDrop } from "./stage/drop.js";
 import { show } from "./stage/show.js";
@@ -39,6 +40,7 @@ export function createStagesAPI(): StagesAPI {
     getPrevStageId,
     getPrevCommitId,
     readBaselineFile,
+    readGitHeadFile,
   };
 }
 

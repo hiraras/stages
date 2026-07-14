@@ -49,7 +49,7 @@ function assertHasNewChanges(
     const prevManifest = readManifest(projectRoot, latest.id);
     const changes = compareManifests(prevManifest, tentative);
     if (changes.length === 0) {
-      throw new StagesError("SNAP_NO_CHANGES", "No new changes to save.");
+      throw new StagesError("SNAP_NO_CHANGES", "No new changes.");
     }
     return;
   }
@@ -60,7 +60,7 @@ function assertHasNewChanges(
     changes.length === 0 ||
     (!usesManifestBaseline(meta) && !hasGitChanges)
   ) {
-    throw new StagesError("SNAP_NO_CHANGES", "No new changes to save.");
+    throw new StagesError("SNAP_NO_CHANGES", "No new changes.");
   }
 }
 

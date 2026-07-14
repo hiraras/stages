@@ -147,6 +147,7 @@ describe("drop", () => {
     );
     await api.snap(root, { message: "second stage" });
 
+    // Dirty check is vs latest stage (unstaged edits), not vs restore target.
     const result = await api.drop(root, "2");
     expect(result.droppedIds).toEqual(["stage-002"]);
     expect(result.restoreTarget).toMatchObject({

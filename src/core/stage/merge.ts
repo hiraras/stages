@@ -1,10 +1,11 @@
-import type { StageEntry } from "../../types/index.js";
+import type { StageEntry, StagesMeta } from "../../types/index.js";
 import { StagesError } from "../errors.js";
 import { resolveIncremental } from "../diff/resolver.js";
 import {
   areContiguousIds,
   normalizeStageInput,
   parseStageNumber,
+  resolveStageEntry,
   suggestContiguousRange,
 } from "../store/id.js";
 import { copyManifest, readManifest } from "../store/manifest.js";
@@ -16,7 +17,7 @@ import {
 } from "../store/meta.js";
 
 function validateMergeInputs(
-  projectRoot: string,
+  meta: StagesMeta,
   resolvedIds: string[],
 ): StageEntry[] {
   if (resolvedIds.length < 2) {
@@ -36,7 +37,8 @@ function validateMergeInputs(
     );
   }
 
-  const stages = resolvedIds.map((id) => getStage(projectRoot, id));
+  // Current cycle only (same as rename/drop/show numeric resolution).
+  const stages = resolvedIds.map((id) => resolveStageEntry(meta, id));
   for (const stage of stages) {
     if (stage.status === "committed" || stage.status === "merged") {
       throw new StagesError(
@@ -62,7 +64,7 @@ export async function merge(
 
   const meta = readMeta(projectRoot);
   const resolvedIds = ids.map((id) => normalizeStageInput(id));
-  const sourceStages = validateMergeInputs(projectRoot, resolvedIds);
+  const sourceStages = validateMergeInputs(meta, resolvedIds);
   const firstSource = sourceStages[0];
   const lastSource = sourceStages[sourceStages.length - 1];
   const survivorId = firstSource.id;

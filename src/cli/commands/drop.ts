@@ -67,8 +67,7 @@ export async function runDrop(
     if (!yes) {
       const confirmed = await confirmDrop();
       if (!confirmed) {
-        console.log("Cancelled.");
-        return;
+        throw new StagesError("DROP_CANCELLED", "Drop cancelled.");
       }
     }
 
@@ -81,6 +80,10 @@ export async function runDrop(
       console.log("  Worktree restored to baseline");
     }
   } catch (error) {
+    if (error instanceof StagesError && error.code === "DROP_CANCELLED") {
+      console.log("Cancelled.");
+      return;
+    }
     if (error instanceof StagesError && error.code === "DIRTY_WORKTREE") {
       warn(error.message);
       process.exit(1);

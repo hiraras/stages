@@ -280,6 +280,11 @@ export function planDrop(projectRoot: string, inputId: string): DropPlan {
   };
 }
 
+/**
+ * Dirty check vs latest active stage (same idea as commit): unstaged edits on top
+ * of the current cycle tip. Comparing to restore target would always look "dirty"
+ * when worktree equals the latest stage — see docs2/features/drop.md.
+ */
 function resolveDropDirtyCheckManifest(
   projectRoot: string,
   meta: StagesMeta,

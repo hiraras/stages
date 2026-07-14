@@ -25,7 +25,7 @@ export const ERROR_MESSAGES: Record<ErrorCode, string> = {
   INVALID_COMMIT: "Cannot commit this stage.",
   ALREADY_INITIALIZED: "Stages is already initialized.",
   PATH_TRAVERSAL: "Invalid file path detected.",
-  SNAP_NO_CHANGES: "No new changes to save.",
+  SNAP_NO_CHANGES: "No new changes.",
   COMMIT_MESSAGE_REQUIRED: "Commit requires -m option.",
   COMMIT_NO_STAGES: "No stages to commit in the current cycle.",
   COMMIT_NOT_FOUND: "Commit not found.",

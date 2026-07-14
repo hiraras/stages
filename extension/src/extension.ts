@@ -52,6 +52,12 @@ function scheduleRefresh(
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   const projectRoot = findStagesRoot();
   if (!projectRoot) {
+    const hasWorkspace = (vscode.workspace.workspaceFolders?.length ?? 0) > 0;
+    if (hasWorkspace) {
+      void vscode.window.showInformationMessage(
+        "Stages: run `stages init` in this project to enable the Stages SCM view.",
+      );
+    }
     return;
   }
 

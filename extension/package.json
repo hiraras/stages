@@ -75,22 +75,22 @@
       "scm/resourceGroup/context": [
         {
           "command": "stages.showFiles",
-          "when": "scmProvider == stages && scmResourceGroupState == files-hidden",
+          "when": "scmProvider == stages && scmResourceGroupState =~ /^files-hidden/",
           "group": "inline"
         },
         {
           "command": "stages.hideFiles",
-          "when": "scmProvider == stages && scmResourceGroupState == files-visible && scmResourceGroup != __unstaged__",
+          "when": "scmProvider == stages && scmResourceGroupState =~ /^files-visible/ && scmResourceGroup != __unstaged__",
           "group": "inline"
         },
         {
           "command": "stages.rename",
-          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/",
+          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/ && scmResourceGroupState =~ /stage-(pending|ready)$/",
           "group": "inline"
         },
         {
           "command": "stages.drop",
-          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/",
+          "when": "scmProvider == stages && scmResourceGroup =~ /^stage-/ && scmResourceGroupState =~ /stage-(pending|ready)$/",
           "group": "1"
         }
       ]

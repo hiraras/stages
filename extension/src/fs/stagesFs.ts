@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { createStagesAPI } from "stages";
 
 const BASELINE_AUTHORITY = "baseline";
+const GIT_HEAD_AUTHORITY = "git-head";
 const EMPTY_AUTHORITY = "__empty__";
 const api = createStagesAPI();
 
@@ -20,6 +21,8 @@ export class StagesContentProvider implements vscode.TextDocumentContentProvider
     let content: Buffer | null = null;
     if (uri.authority === BASELINE_AUTHORITY) {
       content = await api.readBaselineFile(this.projectRoot, filePath);
+    } else if (uri.authority === GIT_HEAD_AUTHORITY) {
+      content = await api.readGitHeadFile(this.projectRoot, filePath);
     } else if (uri.authority === EMPTY_AUTHORITY) {
       return "";
     } else if (uri.authority.startsWith("commit-")) {
@@ -32,7 +35,11 @@ export class StagesContentProvider implements vscode.TextDocumentContentProvider
   }
 
   refresh(): void {
-    this.changeEmitter.fire(vscode.Uri.parse("stages://refresh"));
+    for (const doc of vscode.workspace.textDocuments) {
+      if (doc.uri.scheme === "stages") {
+        this.changeEmitter.fire(doc.uri);
+      }
+    }
   }
 }
 
@@ -60,6 +67,15 @@ export function buildBaselineUri(filePath: string): vscode.Uri {
   return vscode.Uri.from({
     scheme: "stages",
     authority: BASELINE_AUTHORITY,
+    path: `/${filePath}`,
+  });
+}
+
+/** Initial git HEAD (`meta.baseline`) — used as left pane for the oldest stages commit. */
+export function buildGitHeadUri(filePath: string): vscode.Uri {
+  return vscode.Uri.from({
+    scheme: "stages",
+    authority: GIT_HEAD_AUTHORITY,
     path: `/${filePath}`,
   });
 }

@@ -211,4 +211,8 @@ export interface StagesAPI {
     projectRoot: string,
     filePath: string,
   ): Promise<Buffer | null>;
+  readGitHeadFile(
+    projectRoot: string,
+    filePath: string,
+  ): Promise<Buffer | null>;
 }

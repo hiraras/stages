@@ -150,6 +150,28 @@ describe("integration: snap merge commit", () => {
     });
   });
 
+  it("honors .stagesignore when snapping", async () => {
+    const root = createSimpleProject();
+    initTestRepo(root);
+    commitAll(root, "init");
+    await api.init(root);
+
+    fs.writeFileSync(path.join(root, ".stagesignore"), "tmp-ignored/**\n");
+    fs.mkdirSync(path.join(root, "tmp-ignored"), { recursive: true });
+    fs.writeFileSync(path.join(root, "tmp-ignored/secret.txt"), "nope\n");
+    fs.writeFileSync(
+      path.join(root, "src/math.ts"),
+      "export function add(a: number, b: number) { return a + b + 9; }\n",
+    );
+
+    const stage = await api.snap(root, { message: "with ignore" });
+    const diff = api.show(root, stage.id);
+    expect(diff.files.some((file) => file.path.includes("tmp-ignored"))).toBe(
+      false,
+    );
+    expect(diff.files.some((file) => file.path === "src/math.ts")).toBe(true);
+  });
+
   it("rejects non-contiguous merge", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
