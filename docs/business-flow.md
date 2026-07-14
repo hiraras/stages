@@ -20,7 +20,7 @@
 
 | 流程 | slug | 一句话 | 细则 | 状态 |
 |------|------|--------|------|------|
-| 初始化 | `init` | 建立 `.stages` 与初始 baseline | [features/init.md](./features/init.md) | ✅ |
+| 初始化 | `init` | 建立存储并写入 baseline stages commit | [features/init.md](./features/init.md) | ✅ |
 | 保存 stage | `snap` | 把工作区改动存为新 stage | [features/snap.md](./features/snap.md) | ✅ |
 | 列表与概况 | `list-status` | 查看 stage 列表与项目概况 | [features/list-status.md](./features/list-status.md) | ✅ |
 | 查看 diff | `show` | 看 stage / commit 的差异 | [features/show.md](./features/show.md) | ✅ |
@@ -38,22 +38,22 @@
 
 ### 初始化（`init`）
 
-**触发：** 执行 `stages init`；或首次执行 `stages`（snap）且尚未初始化。
+**触发：** 执行 `stages init`（可选 `-m`）；或首次执行 `stages`（snap）且尚未初始化。
 
 **主路径（摘要）：**
 
 1. 确认当前目录为 git 仓库  
 2. 创建 `.stages/` 与初始元数据；将 `.stages/` 写入 `.gitignore`（若尚未存在）  
-3. 记录当前 git HEAD 为初始 baseline  
-4. 若工作区相对 HEAD 已有改动，自动创建第一个 stage；否则不创建  
+3. 记录当前 git HEAD 为 `meta.baseline`  
+4. 扫描工作区 → 写入 **init stages commit**（默认名 `init`，可用 `-m`）；设置 `baselineManifestPath`；**不**建 stage、**不**改工作区  
 
-**结果 / 副作用：** 项目可进入保存 stage 流程；已初始化则提示并跳过。
+**结果 / 副作用：** 已有 baseline commit；空 cycle 可开始 snap；已初始化则提示并跳过。
 
 **相关需求：** [requirements.md](./requirements.md) §3#10、§5.1 init、§5.3  
 
 **细则：** [features/init.md](./features/init.md)  
 
-**相关流程：** 常衔接 [snap](./features/snap.md)。
+**相关流程：** 常衔接 [snap](./features/snap.md)；首条 commit 见 [log](./features/log.md) / [show](./features/show.md)。
 
 ---
 

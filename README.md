@@ -17,8 +17,9 @@ npx stages <command>
 ## 快速开始
 
 ```bash
-# 初始化（工作区相对 HEAD 有改动时自动创建第一个 stage）
+# 初始化：钉死当前工作区为 baseline stages commit（默认名 init）
 stages init
+stages init -m "bootstrap"
 
 # 保存当前改动为一个 stage（首次也可省略 init，会自动初始化）
 stages -m "登录改造"
@@ -59,7 +60,8 @@ git commit -m "feat: auth module"
 - 每次 `stages commit` 后 stage ID **从 `stage-001` 重新计数**；`show` / `merge` / `rename` / `drop` 的数字简写只作用于**当前 cycle**
 - `stages commit` / `drop` 在有未 stage 改动时默认拒绝；`--force` 会用目标快照**覆盖**这些改动
 - 工作区与最新 stage 一致时，`stages -m` 提示 `No new changes.`
-- 可选 `.stagesignore`（语法同 gitignore），与 `.gitignore` 一并约束 snap 范围
+- 可选 `.stagesignore`（语法同 gitignore），与 `.gitignore` 一并约束 snap / init 快照范围
+- `stages init` 会创建 baseline **stages commit**（不建 stage、不改工作区）；之后用户的第一次 `stages commit` 的 show 为相对该 baseline commit 的增量
 
 ## VS Code / Cursor 扩展
 
@@ -88,7 +90,7 @@ code --install-extension extension/stages-vscode-0.1.0.vsix
 | 命令 | 说明 |
 |------|------|
 | `stages` / `stages -m "msg"` | 保存当前改动为 stage |
-| `stages init` | 初始化 `.stages/` |
+| `stages init [-m "msg"]` | 初始化；写入 baseline stages commit（默认名 `init`） |
 | `stages list [--all]` | 列出 stage（`--all` 含隐藏/历史元数据） |
 | `stages status` | 项目概况 |
 | `stages show <id> [--stat] [--open]` | stage 或 commit diff（commit 不支持 `--open`） |

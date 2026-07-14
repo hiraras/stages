@@ -1,15 +1,30 @@
 import fs from "node:fs";
 import path from "node:path";
-import type { StageEntry } from "../../types/index.js";
+import type { CommitEntry, Manifest } from "../../types/index.js";
+import { resolveCommit } from "../diff/resolver.js";
+import { StagesError } from "../errors.js";
 import { getHeadCommit } from "../git/head.js";
 import { isGitRepo } from "../git/worktree.js";
-import { StagesError } from "../errors.js";
 import {
   getBlobsDir,
+  getCommitManifestDir,
   getManifestsDir,
 } from "../paths.js";
-import { createInitialMeta, isInitialized, readMeta, writeMeta } from "../store/meta.js";
-import { createInitialStageIfNeeded } from "./create.js";
+import { buildManifestMap, scanWorkspace } from "../scanner/files.js";
+import { storeBlob } from "../store/blob.js";
+import { formatCommitId } from "../store/id.js";
+import { writeManifest } from "../store/manifest.js";
+import {
+  addCommit,
+  archiveCurrentCycle,
+  createInitialMeta,
+  incrementNextCommitId,
+  isInitialized,
+  readMeta,
+  writeMeta,
+} from "../store/meta.js";
+
+const DEFAULT_INIT_COMMIT_NAME = "init";
 
 function ensureGitignore(projectRoot: string): boolean {
   const gitignorePath = path.join(projectRoot, ".gitignore");
@@ -36,12 +51,63 @@ function ensureGitignore(projectRoot: string): boolean {
   return updated;
 }
 
+/**
+ * Snapshot the current worktree as commit-001 (or next), set cycle baseline to it.
+ * Does not create stages and does not rewrite the worktree.
+ */
+async function createInitCommit(
+  projectRoot: string,
+  name: string,
+): Promise<CommitEntry> {
+  const scanned = await scanWorkspace(projectRoot);
+  const files = buildManifestMap(scanned, (content) =>
+    storeBlob(projectRoot, content),
+  );
+
+  const commitSequence = incrementNextCommitId(projectRoot);
+  const commitId = formatCommitId(commitSequence);
+  const createdAt = new Date().toISOString();
+  const manifestPath = `commits/${commitId}.json`;
+
+  fs.mkdirSync(getCommitManifestDir(projectRoot), { recursive: true });
+  const commitManifest: Manifest = {
+    stageId: manifestPath,
+    createdAt,
+    files,
+  };
+  writeManifest(projectRoot, commitManifest);
+
+  const entry: CommitEntry = {
+    id: commitId,
+    name,
+    createdAt,
+    manifestPath,
+    stageIds: [],
+    stats: { files: 0, additions: 0, deletions: 0 },
+  };
+
+  addCommit(projectRoot, entry);
+  archiveCurrentCycle(projectRoot, commitId, manifestPath);
+
+  const diffResult = resolveCommit(projectRoot, commitId);
+  const withStats: CommitEntry = { ...entry, stats: diffResult.stats };
+  const meta = readMeta(projectRoot);
+  const index = meta.commits.findIndex((item) => item.id === commitId);
+  if (index !== -1) {
+    meta.commits[index] = withStats;
+    writeMeta(projectRoot, meta);
+  }
+
+  return withStats;
+}
+
 export async function init(
   projectRoot: string,
+  opts?: { message?: string },
 ): Promise<{
   alreadyInitialized: boolean;
   gitignoreUpdated: boolean;
-  initialStage?: StageEntry;
+  initialCommit?: CommitEntry;
 }> {
   if (!isGitRepo(projectRoot)) {
     throw new StagesError(
@@ -58,12 +124,13 @@ export async function init(
   fs.mkdirSync(getManifestsDir(projectRoot), { recursive: true });
 
   const meta = createInitialMeta(getHeadCommit(projectRoot));
-
   writeMeta(projectRoot, meta);
   const gitignoreUpdated = ensureGitignore(projectRoot);
-  const initialStage = await createInitialStageIfNeeded(projectRoot);
 
-  return { alreadyInitialized: false, gitignoreUpdated, initialStage: initialStage ?? undefined };
+  const message = opts?.message?.trim() || DEFAULT_INIT_COMMIT_NAME;
+  const initialCommit = await createInitCommit(projectRoot, message);
+
+  return { alreadyInitialized: false, gitignoreUpdated, initialCommit };
 }
 
 export function assertInitialized(projectRoot: string): void {

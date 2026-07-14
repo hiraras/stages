@@ -77,7 +77,7 @@ describe("acceptance: CLI requirements §12.1", () => {
     ).rejects.toMatchObject({ code: "DIRTY_WORKTREE" });
 
     const entry = await api.commit(root, { message: "forced", force: true });
-    expect(entry.id).toBe("commit-001");
+    expect(entry.id).toBe("commit-002");
     expect(gitStatusPorcelain(root)).toContain("src/math.ts");
   });
 });

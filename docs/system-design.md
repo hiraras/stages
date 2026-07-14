@@ -146,7 +146,7 @@ extension/  (dependencies: "stages": "file:.." → 发布时 ^x.y.z)
 
 | 模块 | 建议路径 | 职责 |
 |------|----------|------|
-| Init | `core/stage/init.ts` | `.stages/`、meta、gitignore、可选首 stage |
+| Init | `core/stage/init.ts` | `.stages/`、meta、gitignore、工作区快照 → baseline stages commit |
 | Create | `core/stage/create.ts` | 扫描 → blob/manifest → 新 stage |
 | Merge | `core/stage/merge.ts` | 连续校验、就地合并、prev 重定向 |
 | Commit | `core/stage/commit.ts` | 应用快照、写 commit、归档、重置 ID/baseline |

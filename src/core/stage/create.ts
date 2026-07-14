@@ -10,16 +10,11 @@ import {
 } from "../store/manifest.js";
 import {
   addStage,
-  getCurrentCycleStages,
   getLatestActiveStage,
   incrementNextId,
   readMeta,
 } from "../store/meta.js";
-import { usesManifestBaseline } from "../baseline.js";
 import { buildManifestMap, scanWorkspace } from "../scanner/files.js";
-import { hasWorkspaceChangesVsHead } from "../git/head.js";
-
-const DEFAULT_INITIAL_STAGE_NAME = "initial changes";
 
 async function buildTentativeManifest(projectRoot: string): Promise<Manifest> {
   const scanned = await scanWorkspace(projectRoot);
@@ -55,11 +50,7 @@ function assertHasNewChanges(
   }
 
   const changes = getChangesFromBaseline(projectRoot, meta, tentative);
-  const hasGitChanges = hasWorkspaceChangesVsHead(projectRoot);
-  if (
-    changes.length === 0 ||
-    (!usesManifestBaseline(meta) && !hasGitChanges)
-  ) {
+  if (changes.length === 0) {
     throw new StagesError("SNAP_NO_CHANGES", "No new changes.");
   }
 }
@@ -68,11 +59,10 @@ export async function createStage(
   projectRoot: string,
   opts?: { message?: string },
 ): Promise<StageEntry> {
-  const meta = readMeta(projectRoot);
   const sequence = incrementNextId(projectRoot);
   const stageId = formatStageId(sequence);
   const createdAt = new Date().toISOString();
-  const latest = getLatestActiveStage(meta);
+  const latest = getLatestActiveStage(readMeta(projectRoot));
 
   const scanned = await scanWorkspace(projectRoot);
   const files = buildManifestMap(scanned, (content) =>
@@ -86,12 +76,6 @@ export async function createStage(
   };
 
   writeManifest(projectRoot, manifest);
-
-  const prevManifest = latest ? readManifest(projectRoot, latest.id) : null;
-  const changes =
-    prevManifest === null
-      ? getChangesFromBaseline(projectRoot, meta, manifest)
-      : compareManifests(prevManifest, manifest);
 
   const diffResult = resolveIncrementalForPrev(projectRoot, stageId, latest?.id ?? null);
 
@@ -109,36 +93,6 @@ export async function createStage(
   addStage(projectRoot, entry);
 
   return entry;
-}
-
-export async function createInitialStageIfNeeded(
-  projectRoot: string,
-): Promise<StageEntry | null> {
-  const meta = readMeta(projectRoot);
-  if (getCurrentCycleStages(meta).length > 0) {
-    return null;
-  }
-
-  const scanned = await scanWorkspace(projectRoot);
-  const files = buildManifestMap(scanned, (content) =>
-    storeBlob(projectRoot, content),
-  );
-  const manifest: Manifest = {
-    stageId: formatStageId(meta.nextId),
-    createdAt: new Date().toISOString(),
-    files,
-  };
-
-  const changes = getChangesFromBaseline(projectRoot, meta, manifest);
-  const hasGitChanges = hasWorkspaceChangesVsHead(projectRoot);
-  if (
-    changes.length === 0 ||
-    (!usesManifestBaseline(meta) && !hasGitChanges)
-  ) {
-    return null;
-  }
-
-  return createStage(projectRoot, { message: DEFAULT_INITIAL_STAGE_NAME });
 }
 
 export async function snap(

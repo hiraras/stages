@@ -33,7 +33,7 @@ describe("integration: baseline after commit", () => {
     const stage = await api.snap(root, { message: "cycle2" });
 
     const baselineMath = await api.readBaselineFile(root, "src/math.ts");
-    const commitMath = await api.readCommitFile(root, "commit-001", "src/math.ts");
+    const commitMath = await api.readCommitFile(root, "commit-002", "src/math.ts");
     const stageMath = await api.readFile(root, stage.id, "src/math.ts");
 
     expect(baselineMath?.toString("utf8")).toBe(commitMath?.toString("utf8"));

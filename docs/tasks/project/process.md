@@ -47,6 +47,7 @@
 
 | 日期 | 变更 |
 |------|------|
+| 2026-07-14 | init：写入 baseline stages commit（无自动 stage）；`-m` 可命名 |
 | 2026-07-14 | 对齐审计修复：`.stagesignore`、扩展 commit-001/git-head、merge 当前 cycle、dirty 语义文档校正、菜单 context |
 | 2026-07-14 | 建立 `docs2/tasks/project/`；自旧 process 迁移完成态；对齐 docs2 features/设计 |
 | 2026-07-10～12 | （历史）见原 `docs/process.md` 变更记录 |

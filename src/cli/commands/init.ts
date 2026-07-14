@@ -1,8 +1,8 @@
 import { api, getRoot, handleError, success } from "../utils.js";
 
-export async function runInit(): Promise<void> {
+export async function runInit(message?: string): Promise<void> {
   try {
-    const result = await api.init(getRoot());
+    const result = await api.init(getRoot(), { message });
     if (result.alreadyInitialized) {
       console.log("Already initialized.");
       return;
@@ -14,12 +14,11 @@ export async function runInit(): Promise<void> {
     if (result.gitignoreUpdated) {
       console.log("  Added .stages/ to .gitignore");
     }
-    if (result.initialStage) {
+    if (result.initialCommit) {
+      const { id, name, stats } = result.initialCommit;
       console.log(
-        `  Created ${result.initialStage.id} "${result.initialStage.name}" (${result.initialStage.stats.files} files changed vs HEAD)`,
+        `  Created ${id} "${name}" (${stats.files} files changed vs HEAD)`,
       );
-    } else {
-      console.log("  No changes vs HEAD, no stage created.");
     }
   } catch (error) {
     handleError(error);

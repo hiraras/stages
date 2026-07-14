@@ -156,10 +156,13 @@ export interface DropResult {
 }
 
 export interface StagesAPI {
-  init(projectRoot: string): Promise<{
+  init(
+    projectRoot: string,
+    opts?: { message?: string },
+  ): Promise<{
     alreadyInitialized: boolean;
     gitignoreUpdated: boolean;
-    initialStage?: StageEntry;
+    initialCommit?: CommitEntry;
   }>;
   snap(
     projectRoot: string,

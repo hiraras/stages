@@ -10,7 +10,7 @@
 | P2-02 | manifest 级变更列表（A/M/D） | show | ✅ |
 | P2-03 | `resolveIncremental` / 累计语义 | show · req §5.5 | ✅ |
 | P2-04 | `resolveCommit`（相邻 commit） | show · log | ✅ |
-| P2-05 | `stages init`（gitignore、baseline、可选首 stage） | init | ✅ |
+| P2-05 | `stages init`（gitignore、baseline、**baseline commit**、无自动 stage） | init | ✅ |
 | P2-06 | `snap` / create stage（无改动不建空 stage） | snap | ✅ |
 | P2-07 | 首次 snap 自动等效 init | init · snap | ✅ |
 | P2-08 | stats（增删行）计算 | snap · list | ✅ |

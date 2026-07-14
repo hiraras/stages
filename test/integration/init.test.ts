@@ -11,20 +11,25 @@ import {
 const api = createStagesAPI();
 
 describe("integration: init", () => {
-  it("creates no stage when workspace matches HEAD", async () => {
+  it("creates init commit when workspace matches HEAD", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
     commitAll(root, "init");
 
     const result = await api.init(root);
     expect(result.alreadyInitialized).toBe(false);
-    expect(result.initialStage).toBeUndefined();
+    expect(result.initialCommit?.id).toBe("commit-001");
+    expect(result.initialCommit?.name).toBe("init");
 
     const list = await api.list(root);
     expect(list).toHaveLength(0);
+
+    const log = await api.log(root);
+    expect(log).toHaveLength(1);
+    expect(log[0]?.id).toBe("commit-001");
   });
 
-  it("auto-creates first stage with only changes vs HEAD", async () => {
+  it("snapshots dirty workspace as init commit without creating a stage", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
     commitAll(root, "init");
@@ -34,12 +39,51 @@ describe("integration: init", () => {
       "export function add(a: number, b: number) { return a + b + 1; }\n",
     );
 
-    const result = await api.init(root);
-    expect(result.initialStage?.id).toBe("stage-001");
-    expect(result.initialStage?.stats.files).toBe(1);
+    const result = await api.init(root, { message: "bootstrap" });
+    expect(result.initialCommit?.id).toBe("commit-001");
+    expect(result.initialCommit?.name).toBe("bootstrap");
+    expect(result.initialCommit?.stats.files).toBeGreaterThanOrEqual(1);
 
-    const diff = api.show(root, "1");
-    expect(diff.files).toHaveLength(1);
-    expect(diff.files[0]?.path).toBe("src/math.ts");
+    const list = await api.list(root);
+    expect(list).toHaveLength(0);
+
+    const initDiff = api.show(root, "commit-001");
+    expect(initDiff.files.some((file) => file.path === "src/math.ts")).toBe(
+      true,
+    );
+
+    fs.writeFileSync(
+      path.join(root, "src/config.ts"),
+      'export const APP_NAME = "after-init";\n',
+    );
+    await api.snap(root, { message: "feature" });
+    await api.commit(root, { message: "feature commit" });
+
+    const log = await api.log(root);
+    expect(log.map((c) => c.id)).toEqual(["commit-001", "commit-002"]);
+
+    const featureDiff = api.show(root, "commit-002");
+    expect(featureDiff.files.some((file) => file.path === "src/config.ts")).toBe(
+      true,
+    );
+    // Post-init work should not re-include HEAD→init math.ts change as sole story;
+    // math.ts was already in init commit, so adjacent commit-002 should focus on later edits.
+    expect(
+      featureDiff.files.some((file) => file.path === "src/math.ts"),
+    ).toBe(false);
+  });
+
+  it("skips when already initialized", async () => {
+    const root = createSimpleProject();
+    initTestRepo(root);
+    commitAll(root, "init");
+    await api.init(root);
+
+    const again = await api.init(root, { message: "ignored" });
+    expect(again.alreadyInitialized).toBe(true);
+    expect(again.initialCommit).toBeUndefined();
+
+    const log = await api.log(root);
+    expect(log).toHaveLength(1);
   });
 });

@@ -20,14 +20,14 @@ describe("integration: verify", () => {
     expect(result).toEqual({ status: "skipped", reason: "not_initialized" });
   });
 
-  it("skips when there are no stages", async () => {
+  it("passes when only init commit exists and worktree is clean", async () => {
     const root = createSimpleProject();
     initTestRepo(root);
     commitAll(root, "init");
     await api.init(root);
 
     const result = await api.verify(root);
-    expect(result).toEqual({ status: "skipped", reason: "no_stages" });
+    expect(result).toEqual({ status: "ok" });
   });
 
   it("fails when stages are not committed", async () => {

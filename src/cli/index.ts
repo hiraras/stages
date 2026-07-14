@@ -83,8 +83,9 @@ program
 program
   .command("init")
   .description("Initialize stages in the current project")
-  .action(async () => {
-    await runInit();
+  .option("-m, --message <message>", "Name for the init baseline commit", "init")
+  .action(async (options: { message?: string }) => {
+    await runInit(options.message);
   });
 
 program

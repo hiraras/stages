@@ -21,6 +21,7 @@ stages verify
 |------|------|
 | 未 init | **跳过**，提示 |
 | 无 stage 且无 commit 历史 | **跳过** |
+| 仅有 init baseline commit、无 pending stage、工作区干净 | **通过** |
 | 当前 cycle 有未 commit 的 stage | **失败**，退出码 1 |
 | 工作区有未 stage 改动 | **失败**，退出码 1 |
 | 全部已 commit 且工作区干净 | **通过**，退出码 0 |

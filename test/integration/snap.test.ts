@@ -79,21 +79,23 @@ describe("integration: snap merge commit", () => {
     expect(allStages.every((item) => item.status === "committed")).toBe(true);
 
     const commits = await api.log(root);
-    expect(commits).toHaveLength(1);
-    expect(commits[0]?.name).toBe("auth module");
+    expect(commits).toHaveLength(2);
+    expect(commits[0]?.name).toBe("init");
+    expect(commits[1]?.name).toBe("auth module");
 
-    const commitDiff = api.show(root, "commit-001");
+    const commitDiff = api.show(root, "commit-002");
     expect(commitDiff.stats.files).toBeGreaterThan(0);
     expect(commitDiff.files.some((file) => file.path === "src/math.ts")).toBe(true);
 
-    const commitDiffShort = api.show(root, "c1");
+    const commitDiffShort = api.show(root, "c2");
     expect(commitDiffShort.stats.files).toBe(commitDiff.stats.files);
 
-    const commitFile = await api.readCommitFile(root, "commit-001", "src/math.ts");
+    const commitFile = await api.readCommitFile(root, "commit-002", "src/math.ts");
     expect(commitFile).not.toBeNull();
     expect(commitFile!.toString("utf8")).toContain("return a + b + 2");
 
     expect(await api.getPrevCommitId(root, "commit-001")).toBeNull();
+    expect(await api.getPrevCommitId(root, "commit-002")).toBe("commit-001");
 
     const activeList = await api.list(root);
     expect(activeList).toHaveLength(0);
@@ -123,13 +125,14 @@ describe("integration: snap merge commit", () => {
 
     expect(await api.getPrevCommitId(root, "commit-001")).toBeNull();
     expect(await api.getPrevCommitId(root, "commit-002")).toBe("commit-001");
+    expect(await api.getPrevCommitId(root, "commit-003")).toBe("commit-002");
 
-    const secondCommitFile = await api.readCommitFile(
+    const secondCycleFile = await api.readCommitFile(
       root,
-      "commit-002",
+      "commit-003",
       "src/math.ts",
     );
-    expect(secondCommitFile?.toString("utf8")).toContain("return a + b + 9");
+    expect(secondCycleFile?.toString("utf8")).toContain("return a + b + 9");
   });
 
   it("rejects snap when workspace matches latest stage", async () => {
