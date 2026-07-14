@@ -1,5 +1,5 @@
 {
-  "name": "@hirara/stages",
+  "name": "@hiraras/stages",
   "version": "1.0.0",
   "description": "Cross-session code staging layer for AI-assisted development",
   "type": "module",

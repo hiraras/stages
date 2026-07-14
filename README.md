@@ -7,9 +7,9 @@
 ## 安装
 
 ```bash
-npm install -g @hirara/stages
+npm install -g @hiraras/stages
 # 或
-npx @hirara/stages <command>
+npx @hiraras/stages <command>
 ```
 
 要求：Node.js >= 18，项目为 git 仓库。

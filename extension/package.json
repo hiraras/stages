@@ -103,7 +103,7 @@
     "vscode:prepublish": "npm run build"
   },
   "dependencies": {
-    "@hirara/stages": "file:.."
+    "@hiraras/stages": "file:.."
   },
   "devDependencies": {
     "@types/node": "^20.17.10",
