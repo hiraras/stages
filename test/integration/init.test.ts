@@ -60,7 +60,7 @@ describe("integration: init", () => {
     await api.commit(root, { message: "feature commit" });
 
     const log = await api.log(root);
-    expect(log.map((c) => c.id)).toEqual(["commit-001", "commit-002"]);
+    expect(log.map((c) => c.id)).toEqual(["commit-002", "commit-001"]);
 
     const featureDiff = api.show(root, "commit-002");
     expect(featureDiff.files.some((file) => file.path === "src/config.ts")).toBe(

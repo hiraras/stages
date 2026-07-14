@@ -80,8 +80,8 @@ describe("integration: snap merge commit", () => {
 
     const commits = await api.log(root);
     expect(commits).toHaveLength(2);
-    expect(commits[0]?.name).toBe("init");
-    expect(commits[1]?.name).toBe("auth module");
+    expect(commits[0]?.name).toBe("auth module");
+    expect(commits[1]?.name).toBe("init");
 
     const commitDiff = api.show(root, "commit-002");
     expect(commitDiff.stats.files).toBeGreaterThan(0);

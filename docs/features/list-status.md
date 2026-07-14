@@ -20,8 +20,8 @@ stages status
 
 ## 3. 语义与规则
 
-1. **默认 `list`：当前 cycle 可见 stage**（`pending` / `ready`）；`merged` **默认隐藏**。
-2. **`list --all`：** 可含 merged、已归档到 commit 的历史 stage 元数据等（实现须标明来源 cycle/commit，避免同名 ID 误解）。
+1. **默认 `list`：当前 cycle 可见 stage**（`pending` / `ready`）；`merged` **默认隐藏**；展示顺序 **新 → 旧**（按 `createdAt`）。
+2. **`list --all`：** 可含 merged、已归档到 commit 的历史 stage 元数据等（实现须标明来源 cycle/commit，避免同名 ID 误解）；同样 **新 → 旧**。
 3. **`status`：** 项目概况（是否 init、当前 cycle stage 数量、是否有未 stage 改动、最近 commit 等——具体字段见设计）。
 4. 状态枚举：`pending` | `merged` | `ready`（同 pending）| `committed`。
 
@@ -55,6 +55,7 @@ stages status
 
 - merge 后默认 list 只见保留 stage；`--all` 可见 merged
 - commit 后默认 list 不展示已归档 stage；`--all` 可查看
+- 默认输出为 **新 → 旧**
 - status 反映当前 cycle 概况
 
 ## 9. 非目标 / 后续

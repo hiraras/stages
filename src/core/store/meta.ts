@@ -150,16 +150,17 @@ export function findStages(
   const meta = readMeta(projectRoot);
   const stages = [...meta.stages];
 
-  if (filter?.all) {
-    return stages;
-  }
+  const filtered = filter?.all
+    ? stages
+    : stages.filter(
+        (stage) =>
+          isCurrentCycleStage(stage) &&
+          !stage.hidden &&
+          stage.status !== "merged",
+      );
 
-  return stages.filter(
-    (stage) =>
-      isCurrentCycleStage(stage) &&
-      !stage.hidden &&
-      stage.status !== "merged",
-  );
+  // Newest first for CLI / API consumers.
+  return filtered.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 export function rewirePrevPointers(

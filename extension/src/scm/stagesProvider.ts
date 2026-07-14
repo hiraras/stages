@@ -152,9 +152,8 @@ export class StagesSCMProvider implements vscode.Disposable {
       api.listUnstaged(this.projectRoot),
     ]);
 
-    const visibleStages = sortNewestFirst(current);
-
-    const visibleCommits = [...(await api.log(this.projectRoot))].reverse();
+    const visibleStages = current;
+    const visibleCommits = await api.log(this.projectRoot);
     const commitPrevIds = new Map<string, string | null>();
     for (let index = 0; index < visibleCommits.length; index += 1) {
       const commit = visibleCommits[index]!;
@@ -598,10 +597,6 @@ export class StagesSCMProvider implements vscode.Disposable {
   private formatCommitLabel(commit: CommitEntry): string {
     return `${commit.id.replace("commit-", "")} ${commit.name} [commit]`;
   }
-}
-
-function sortNewestFirst(stages: StageEntry[]): StageEntry[] {
-  return [...stages].sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
 function buildWorkspaceUri(projectRoot: string, filePath: string): vscode.Uri {

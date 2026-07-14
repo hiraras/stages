@@ -3,5 +3,6 @@ import { readMeta, listCommits } from "../store/meta.js";
 
 export async function log(projectRoot: string): Promise<CommitEntry[]> {
   const meta = readMeta(projectRoot);
-  return listCommits(meta);
+  // Newest first (matches stages list / SCM).
+  return listCommits(meta).slice().reverse();
 }
